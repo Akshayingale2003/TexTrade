@@ -1,0 +1,252 @@
+{% extends 'carousel.html' %}
+{% block b %}
+{% load static %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-red: #E40203;
+        --dark-accent: #1a1a1a;
+    }
+
+    body {
+        background-color: #fcfcfc;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Section Header */
+    .category-container {
+        padding: 60px 0 20px;
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .category-title {
+        font-weight: 800;
+        font-size: 2rem;
+        color: var(--dark-accent);
+        margin: 0;
+        text-transform: capitalize;
+        position: relative;
+    }
+
+    .category-title::after {
+        content: '';
+        display: block;
+        width: 50px;
+        height: 4px;
+        background: var(--primary-red);
+        margin-top: 8px;
+    }
+
+    /* Modern Product Card */
+    .product-card {
+        border: none;
+        border-radius: 16px;
+        background: #fff;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .img-wrapper {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+        background: #f8f8f8;
+    }
+
+    .card-img-top {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Professional look for product shots */
+        padding: 15px;
+        transition: transform 0.6s ease;
+    }
+
+    .product-card:hover .card-img-top {
+        transform: scale(1.08);
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    .product-price {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--primary-red);
+    }
+
+    .product-name {
+        font-weight: 600;
+        font-size: 1.05rem;
+        color: #333;
+        margin: 5px 0 15px;
+        height: 2.8rem;
+        overflow: hidden;
+    }
+
+    /* Action Buttons */
+    .btn-group-custom {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-add-cart {
+        flex: 2;
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-add-cart:hover {
+        background: #c40203;
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-quick-view {
+        flex: 1;
+        background: #f1f1f1;
+        color: #555;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        transition: 0.3s;
+    }
+
+    .btn-quick-view:hover {
+        background: #e0e0e0;
+    }
+
+    /* Fixed Scroll Button */
+    #scrollbtn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--primary-red);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(228, 2, 3, 0.4);
+    }
+
+    /* Fixed Modal Logic Styling */
+    .modal-content {
+        border-radius: 24px;
+        border: none;
+        overflow: hidden;
+    }
+</style>
+<div class="container-fluid px-lg-5">
+    {% for i in cat %}
+    <div class="category-container">
+        <div class="category-header">
+            <h2 class="category-title">{{ i.name }}</h2>
+        </div>
+        <div class="row">
+            {% for j in pro %}
+            {% if i.name == j.category.name %}
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card product-card">
+                    <div class="img-wrapper">
+                        <img class="card-img-top" src="{{ j.image.url }}" alt="{{ j.name }}">
+                    </div>
+                    <div class="card-body">
+                        <div class="product-price">₹{{ j.price }}</div>
+                        <h5 class="product-name">{{ j.name }}</h5>
+                        
+                        <div class="btn-group-custom">
+                            <form action="{% url 'add_cart' j.id %}" method="post" class="flex-grow-1">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-add-cart w-100">
+                                    <i class="fas fa-shopping-basket mr-1"></i> Add
+                                </button>
+                            </form>
+                            <button class="btn-quick-view" data-toggle="modal" data-target="#productModal{{ j.id }}">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="productModal{{ j.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body p-0">
+                            <button type="button" class="close p-3" data-dismiss="modal" style="position:absolute; right:10px; z-index:10;">&times;</button>
+                            <div class="row no-gutters">
+                                <div class="col-md-6 bg-light d-flex align-items-center justify-content-center p-4">
+                                    <img src="{{ j.image.url }}" class="img-fluid" style="max-height: 400px;">
+                                </div>
+                                <div class="col-md-6 p-5">
+                                    <span class="badge badge-danger mb-2">{{ i.name }}</span>
+                                    <h2 class="font-weight-bold">{{ j.name }}</h2>
+                                    <h3 class="text-danger font-weight-bold mt-3 mb-4">₹{{ j.price }}</h3>
+                                    <p class="text-muted">{{ j.desc }}</p>
+                                    
+                                    <hr>
+                                    
+                                    <form action="{% url 'add_cart' j.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-lg btn-block py-3 mt-4" style="border-radius:12px; font-weight:700;">
+                                            ADD TO CART
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+<script>
+    // Scroll handling
+    window.onscroll = function() {
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            document.getElementById("scrollbtn").style.display = "block";
+        } else {
+            document.getElementById("scrollbtn").style.display = "none";
+        }
+    };
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+{% endblock %}

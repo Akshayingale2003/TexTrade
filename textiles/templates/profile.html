@@ -1,0 +1,192 @@
+{% extends 'navigation.html' %}
+{% load static %}
+{% block body %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --text-dark: #2d3436;
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .profile-card {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 50px;
+        margin-bottom: 50px;
+        backdrop-filter: blur(10px);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .profile-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .profile-img-wrapper {
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 25px;
+        padding: 8px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+        border: 1px solid #eee;
+        position: relative;
+    }
+
+    .profile-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    /* Small floating edit icon on image */
+    .edit-photo-badge {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: var(--main-gradient);
+        color: white;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid #fff;
+        font-size: 14px;
+    }
+
+    .info-row {
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 700;
+        color: #636e72;
+        width: 35%;
+        font-size: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .icon-box {
+        width: 35px;
+        color: #6c5ce7;
+        font-size: 18px;
+    }
+
+    /* Edit Button Styling */
+    .btn-edit-profile {
+        background: var(--main-gradient);
+        color: white !important;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        display: inline-block;
+        margin-top: 30px;
+        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.2);
+    }
+
+    .btn-edit-profile:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-img-wrapper">
+                        <img src="{{pro.image.url}}" alt="Profile Picture">
+                        <a href="{% url 'edit_profile' %}" class="edit-photo-badge">
+                            <i class="fas fa-camera"></i>
+                        </a>
+                    </div>
+                    <h2>My Profile</h2>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-user"></i></div>
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">{{pro.user.first_name}} {{pro.user.last_name}}</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-envelope"></i></div>
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">{{pro.user.email}}</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-phone"></i></div>
+                    <div class="info-label">Contact</div>
+                    <div class="info-value">{{pro.contact}}</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="info-label">Date of Birth</div>
+                    <div class="info-value">{{pro.dob}}</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-city"></i></div>
+                    <div class="info-label">City</div>
+                    <div class="info-value">{{pro.city}}</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="icon-box"><i class="fas fa-map-marker-alt"></i></div>
+                    <div class="info-label">Address</div>
+                    <div class="info-value">{{pro.address}}</div>
+                </div>
+
+                <div class="text-center">
+                    <a href="{% url 'edit_profile' %}" class="btn-edit-profile">
+                        <i class="fas fa-user-edit mr-2"></i> Edit Profile Information
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

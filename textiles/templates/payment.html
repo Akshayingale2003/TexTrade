@@ -1,0 +1,197 @@
+{% extends 'navigation.html' %}
+{% load static %}
+{% block body %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page | texTrade</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // --- Online Payment Logic ---
+            var options = {
+                "key": "{{ razorpay_key }}",
+                "amount": "{{ amount }}",
+                "currency": "INR",
+                "name": "texTrade",
+                "description": "Order Payment",
+                "order_id": "{{ order_id }}",
+                "handler": function (response) {
+                    fetch("/payment-success/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: new URLSearchParams({
+                            "razorpay_payment_id": response.razorpay_payment_id,
+                            "razorpay_order_id": response.razorpay_order_id,
+                            "booking_id": "{{ booking_id }}"
+                        })
+                    }).then(response => response.json())
+                      .then(data => {
+                          alert("Payment Successful! Booking updated.");
+                          window.location.href = `/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=${response.razorpay_payment_id}`;
+                      })
+                      .catch(error => console.error("Error:", error));
+                },
+                "theme": { "color": "#764ba2" }
+            };
+        
+            var rzp1 = new Razorpay(options);
+            document.getElementById("pay-btn").onclick = function(e) {
+                rzp1.open();
+                e.preventDefault();
+            };
+
+            // --- Cash on Delivery Logic ---
+            document.getElementById("cod-btn").onclick = function(e) {
+                if(confirm("Confirm order with Cash on Delivery?")) {
+                    fetch("/payment-success/", { // Using your existing success URL logic
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: new URLSearchParams({
+                            "payment_mode": "COD",
+                            "booking_id": "{{ booking_id }}"
+                        })
+                    }).then(response => {
+                        alert("Order Placed Successfully via COD!");
+                        window.location.href = `/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=COD`;
+                    }).catch(error => console.error("Error:", error));
+                }
+            };
+        });
+    </script>
+
+    <style>
+        .payment-wrapper {
+            max-width: 500px;
+            margin: 60px auto;
+            background: var(--glass-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.05);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .payment-wrapper h3 {
+            font-weight: 700;
+            background: var(--main-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .amount-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 20px 0;
+        }
+
+        .amount-display span {
+            font-size: 1.2rem;
+            color: #636e72;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        #pay-btn, #cod-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        #pay-btn {
+            background: var(--main-gradient);
+            color: white !important;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+        }
+
+        #cod-btn {
+            background: #f1f2f6;
+            color: var(--text-dark) !important;
+            border: 1px solid #dfe6e9;
+        }
+
+        #pay-btn:hover, #cod-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        #pay-btn i, #cod-btn i {
+            margin-right: 10px;
+        }
+
+        .security-note {
+            margin-top: 25px;
+            font-size: 13px;
+            color: #b2bec3;
+        }
+
+        .divider {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #b2bec3;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #eee;
+        }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-wrapper">
+            <h3>Checkout</h3>
+            <hr>
+            
+            <p class="text-muted mb-1">Total Payable Amount</p>
+            <div class="amount-display">
+                <span>₹</span>{{ amount }}
+            </div>
+
+            <button id="pay-btn">
+                <i class="fas fa-credit-card"></i> Pay Online (Razorpay)
+            </button>
+
+            <div class="divider">OR</div>
+
+            <button id="cod-btn">
+                <i class="fas fa-truck"></i> Cash on Delivery
+            </button>
+
+            <div class="security-note">
+                <i class="fas fa-lock"></i> All transactions are safe and encrypted
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'navigation.html' %}
+{% block body %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .view-product-container {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 40px;
+        margin-bottom: 40px;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Table Styling */
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        width: 100%;
+    }
+
+    .custom-table thead th {
+        background: transparent;
+        border: none;
+        color: #636e72;
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 15px;
+    }
+
+    .custom-table tbody tr {
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        transition: 0.3s;
+    }
+
+    .custom-table tbody tr:hover {
+        transform: scale(1.01);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .custom-table td {
+        vertical-align: middle;
+        padding: 15px;
+        border: none;
+        color: #2d3436;
+        font-weight: 500;
+    }
+
+    .custom-table td:first-child { border-radius: 15px 0 0 15px; }
+    .custom-table td:last-child { border-radius: 0 15px 15px 0; }
+
+    .prod-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #eee;
+    }
+
+    .btn-edit {
+        background: #00b894;
+        color: white !important;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .btn-delete {
+        background: #ff7675;
+        color: white !important;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .btn-edit:hover, .btn-delete:hover {
+        opacity: 0.8;
+        transform: translateY(-2px);
+    }
+
+    .category-badge {
+        background: #f1f2f6;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        color: #6c5ce7;
+        font-weight: 700;
+    }
+</style>
+
+<div class="container">
+    <div class="view-product-container">
+        <div class="page-header">
+            <h2>Inventory Management</h2>
+            <p class="text-muted">You have {{count}} active products in your shop</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table" id="myTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                        <th>Edit</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in pro %}
+                    <tr>
+                        <td class="font-weight-bold">{{i.name}}</td>
+                        <td><img src="{{i.image.url}}" class="prod-img"></td>
+                        <td><span class="category-badge">{{i.category.name}}</span></td>
+                        <td class="text-success font-weight-bold">₹{{i.price}}</td>
+                        <td class="text-muted small">{{i.desc|truncatechars:50}}</td>
+                        
+                        <td>
+                            <a href="{% url 'edit_product' i.id %}">
+                                <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'delete_product' i.id %}" onclick="return confirm('Are you sure you want to delete this product?')">
+                                <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+  {% for i in message %}
+    alert("{{i}}");
+  {% endfor %}
+</script>
+
+{% endblock %}

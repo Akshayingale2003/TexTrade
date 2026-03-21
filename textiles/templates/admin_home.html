@@ -1,0 +1,149 @@
+{% extends 'navigation.html' %} 
+{% load static %}
+{% block body %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Refined Glowing Dashboard Title */
+    .dashboard-title {
+        font-size: 50px;
+        font-weight: 700;
+        text-align: center;
+        margin-top: 100px;
+        color: #333;
+        letter-spacing: 2px;
+        animation: subtleGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes subtleGlow {
+        from { text-shadow: 0 0 5px #fff, 0 0 10px rgba(0,123,255,0.2); }
+        to { text-shadow: 0 0 15px rgba(0,123,255,0.4), 0 0 20px rgba(0,123,255,0.2); }
+    }
+
+    .divider {
+        width: 100px;
+        height: 5px;
+        background: linear-gradient(to right, #007bff, #00d4ff);
+        margin: 10px auto 50px;
+        border-radius: 10px;
+    }
+
+    /* Modern Stat Cards */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 40px 20px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    /* Background decoration for cards */
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0,123,255,0.05) 0%, transparent 70%);
+        z-index: -1;
+        transition: 0.5s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        background: #fff;
+    }
+
+    .stat-card:hover::before {
+        background: radial-gradient(circle, rgba(0,123,255,0.1) 0%, transparent 70%);
+    }
+
+    .stat-icon {
+        font-size: 55px;
+        margin-bottom: 20px;
+        display: inline-block;
+        background: linear-gradient(135deg, #007bff, #00d4ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .stat-card h2 {
+        font-size: 1.2rem;
+        color: #6c757d;
+        font-weight: 400;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .stat-count {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    /* Blue Highlight for links on hover */
+    .text-decoration-none:hover .stat-count {
+        color: #007bff;
+    }
+
+</style>
+
+<div class="container mb-5">
+    <h1 class="dashboard-title">Admin Dashboard</h1>
+    <div class="divider"></div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'view_user' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="fas fa-users stat-icon"></i>
+                    <h2>Total Customers</h2>
+                    <p class="stat-count">{{ total_customer }}</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'admin_viewBooking' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check stat-icon"></i>
+                    <h2>Total Bookings</h2>
+                    <p class="stat-count">{{ total_book }}</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'admin_view_product' %}" class="text-decoration-none">
+                <div class="stat-card">
+                    <i class="fas fa-box-open stat-icon"></i>
+                    <h2>Total Products</h2>
+                    <p class="stat-count">{{ total_pro }}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

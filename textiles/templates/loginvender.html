@@ -1,0 +1,150 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    .vendor-login-section {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 0;
+        background-color: #f4f7f6;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 450px;
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .login-box h2 {
+        font-weight: 700;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+    }
+
+    .icon-header {
+        font-size: 50px;
+        color: #f39c12;
+        margin-bottom: 20px;
+    }
+
+    .form-control-login {
+        height: 50px;
+        border-radius: 10px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding-left: 20px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: block;
+        width: 100%;
+    }
+
+    .form-control-login:focus {
+        box-shadow: 0 0 0 0.2rem rgba(243, 156, 18, 0.1);
+        border-color: #f39c12;
+        background: #fff;
+        outline: none;
+    }
+
+    .btn-vendor-login {
+        background: #2d3436;
+        color: #fff;
+        width: 100%;
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-vendor-login:hover {
+        background: #000;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .signup-link {
+        display: block;
+        margin-top: 25px;
+        color: #636e72;
+        font-size: 14px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .signup-link strong {
+        color: #f39c12;
+    }
+
+    .custom-alert {
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 12px;
+    }
+</style>
+
+<div class="vendor-login-section">
+    <div class="login-box">
+        <div class="icon-header">
+            <i class="fas fa-store"></i>
+        </div>
+        <h2>Vendor Login</h2>
+
+        {% if error == "yes" %}
+            <div class="alert alert-success custom-alert" role="alert">
+                ✅ Logged in successfully! Redirecting ...
+            </div>
+            <script>
+                setTimeout(function() {
+                    window.location.href = '{% url "vendor_home" %}';
+                }, 2000); 
+            </script>
+        {% elif error == "not" %}
+            <div class="alert alert-danger custom-alert" role="alert">
+                ❌ Username & Password are not matching.
+            </div>
+        {% elif error == "not_allowed" %}
+            <div class="alert alert-warning custom-alert" role="alert">
+                ⚠️ You are not authorized to access the vendor panel!
+            </div>
+        {% endif %}
+
+        {% if error != "yes" %}
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group text-left">
+                <label class="small font-weight-bold ml-1">Vendor ID</label>
+                <input type="text" name="uname" class="form-control-login" placeholder="Username" required>
+            </div>
+            <div class="form-group text-left">
+                <label class="small font-weight-bold ml-1">Password</label>
+                <input type="password" name="pwd" class="form-control-login" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-vendor-login">Login</button>
+        </form>
+
+        <a href="{% url 'signupvender' %}" class="signup-link">
+            Become a Partner? <strong>Register here</strong>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .admin-wrapper {
+        margin-top: 60px;
+        margin-bottom: 60px;
+    }
+
+    .edit-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        padding: 40px;
+        transition: 0.3s;
+    }
+
+    .edit-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .edit-icon-box {
+        width: 70px;
+        height: 70px;
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        margin: 0 auto 20px;
+    }
+
+    .edit-title {
+        font-weight: 700;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #636e72;
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+
+    .form-control-edit {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #f1f1f1;
+        transition: 0.3s;
+        background-color: #fdfdfd;
+        font-weight: 500;
+    }
+
+    .form-control-edit:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+        background-color: #fff;
+    }
+
+    .image-preview-container {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+    }
+
+    #imagePreview {
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .btn-update-prod {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 20px;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(0, 123, 255, 0.2);
+    }
+
+    .btn-update-prod:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 25px rgba(0, 123, 255, 0.3);
+        color: #fff;
+    }
+
+    textarea.form-control-edit {
+        min-height: 100px;
+    }
+</style>
+
+<div class="container admin-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="edit-card">
+                <div class="edit-header">
+                    <div class="edit-icon-box">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <h3 class="edit-title">Edit Product Details</h3>
+                    <p class="text-muted small">ID: #{{ product.id }} | Last updated via Management Console</p>
+                </div>
+
+                <form method="post" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label><i class="fas fa-box-open mr-1"></i> Product Name</label>
+                        <input type="text" class="form-control form-control-edit" name="pname" value="{{ product.name }}" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-layer-group mr-1"></i> Category</label>
+                            <select class="form-control form-control-edit" name="cat" required>
+                                <option value="{{ product.category.name }}">{{ product.category.name }} [Current]</option>
+                                {% for i in cat%}
+                                    <option value="{{ i.name }}">{{ i.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-tag mr-1"></i> Price (Rs.)</label>
+                            <input type="number" class="form-control form-control-edit" name="price" value="{{ product.price }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mt-3">
+                        <div class="col-md-7 form-group">
+                            <label><i class="fas fa-image mr-1"></i> Update Image (Optional)</label>
+                            <input type="file" class="form-control form-control-edit" name="img" onchange="previewImage(event)">
+                            <small class="text-muted mt-2 d-block">Leave empty to keep current image</small>
+                        </div>
+                        <div class="col-md-5 text-center">
+                            <div class="image-preview-container">
+                                <label class="d-block small font-weight-bold text-uppercase mb-2">Image Preview</label>
+                                <img src="{{ product.image.url }}" id="imagePreview" width="140px" height="110px">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label><i class="fas fa-align-left mr-1"></i> Description</label>
+                        <textarea class="form-control form-control-edit" name="desc" rows="4" required>{{ product.desc }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-update-prod">
+                        <i class="fas fa-sync-alt mr-2"></i> Save Changes
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="javascript:history.back()" class="text-muted small"><i class="fas fa-chevron-left"></i> Discard and return</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    {% if error == "no" %}
+        alert('✅ Product details have been updated successfully!');
+    {% endif %}
+
+
+    // Image Preview Function
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
+{% endblock %}

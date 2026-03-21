@@ -1,0 +1,138 @@
+{% extends 'navigation.html' %}
+
+{% block body %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    .confirmation-wrapper {
+        margin-top: 100px;
+        margin-bottom: 50px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .success-icon {
+        font-size: 80px;
+        color: #28a745;
+        margin-bottom: 20px;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+        0% { transform: scale(0); }
+        80% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .confirmation-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #28a745, #218838);
+        color: white;
+        padding: 25px;
+        border: none;
+    }
+
+    .list-group-item {
+        border-left: none;
+        border-right: none;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+    }
+
+    .list-group-item:first-child { border-top: none; }
+
+    .detail-label {
+        color: #7f8c8d;
+        font-weight: 500;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .detail-value {
+        color: #2d3436;
+        font-weight: 600;
+        font-size: 1.05rem;
+    }
+
+    .btn-home {
+        background-color: #E6120E;
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(230, 18, 14, 0.3);
+    }
+
+    .btn-home:hover {
+        background-color: #c40f0c;
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(230, 18, 14, 0.4);
+    }
+
+    .status-badge {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container confirmation-wrapper">
+    <div class="text-center mb-5">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1 class="font-weight-bold">Order Confirmed!</h1>
+        <p class="text-muted lead">Thank you for your order. We've received your booking.</p>
+    </div>
+
+    <div class="card confirmation-card mx-auto shadow-sm" style="max-width: 600px;">
+        <div class="card-header-custom text-center">
+            <h4 class="mb-0">Order Summary</h4>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                <div class="list-group-item">
+                    <span class="detail-label">Order ID</span>
+                    <span class="detail-value">#{{ booking_id }}</span>
+                </div>
+                <div class="list-group-item">
+                    <span class="detail-label">Total Amount</span>
+                    <span class="detail-value text-success" style="font-size: 1.3rem;">₹{{ total_amount }}</span>
+                </div>
+                <div class="list-group-item">
+                    <span class="detail-label">Payment ID</span>
+                    <span class="detail-value">{{ payment_id }}</span>
+                </div>
+                <div class="list-group-item">
+                    <span class="detail-label">Order Date</span>
+                    <span class="detail-value">{{ booking_date }}</span>
+                </div>
+                <div class="list-group-item">
+                    <span class="detail-label">Order Status</span>
+                    <span class="status-badge">Confirmed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="/" class="btn btn-home">
+            <i class="fas fa-home mr-2"></i> Return to Home
+        </a>
+    </div>
+</div>
+
+{% endblock %}

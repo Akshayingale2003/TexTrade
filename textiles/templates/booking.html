@@ -1,0 +1,217 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .checkout-wrapper {
+        margin-top: 100px;
+        margin-bottom: 60px;
+    }
+
+    .checkout-title {
+        font-weight: 700;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .booking-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        padding: 40px;
+        margin-top: 30px;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #E6120E;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f1f1f1;
+        padding-bottom: 10px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #636e72;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    .form-control-custom {
+        background-color: #f8f9fa !important;
+        border: 1px solid #e9ecef;
+        color: #2d3436;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 12px 15px;
+        height: auto;
+    }
+
+    .total-amount-display {
+        background: #2d3436;
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .total-amount-display label {
+        color: #aaa !important;
+        display: block;
+        margin-bottom: 0;
+    }
+
+    .total-val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #E6120E;
+        border: none;
+        background: transparent;
+        text-align: center;
+        width: 100%;
+    }
+
+    #confirm-btn {
+        background: linear-gradient(135deg, #28a745, #218838);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(40, 167, 69, 0.2);
+    }
+
+    #confirm-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    /* Modal Styling */
+    .modal-content { border-radius: 20px; border: none; }
+    .modal-header { border-bottom: none; padding-top: 30px; }
+</style>
+
+<div class="container checkout-wrapper">
+    <h2 class="text-center checkout-title">Confirm Your Booking</h2>
+    <p class="text-center text-muted">Please review your details before final confirmation</p>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="booking-card">
+                <form method="post" action="{% url 'booking_order' pid=book_id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-section-title"><i class="fas fa-user-shield mr-2"></i> Personal & Booking Info</div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-receipt mr-1"></i> Booking ID</label>
+                            <input type="text" class="form-control form-control-custom" name="book_id" value="{{ book_id }}" readonly>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-user mr-1"></i> Customer Name</label>
+                            <input type="text" class="form-control form-control-custom" name="name" value="{{ request.user.username }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-calendar-alt mr-1"></i> Booking Date</label>
+                            <input type="text" class="form-control form-control-custom" name="date1" value="{{ date1 }}" readonly>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-envelope mr-1"></i> Email Address</label>
+                            <input type="email" class="form-control form-control-custom" name="email" value="{{ request.user.email }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4"><i class="fas fa-map-marked-alt mr-2"></i> Shipping Details</div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-city mr-1"></i> City</label>
+                            <input type="text" class="form-control form-control-custom" name="city" value="{{ data.city }}" readonly>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-phone mr-1"></i> Contact Number</label>
+                            <input type="text" class="form-control form-control-custom" name="contact" value="{{ data.contact }}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-home mr-1"></i> Full Address</label>
+                        <input type="text" class="form-control form-control-custom" name="add" value="{{ data.address }}" readonly>
+                    </div>
+
+                    <div class="row mt-4 align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="total-amount-display">
+                                <label>Total Amount Payable</label>
+                                <input type="number" class="total-val" name="total" value="{{ total }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="confirm-btn" class="btn btn-block" type="submit">
+                                <i class="fas fa-check-circle mr-2"></i> Confirm Order
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content p-4 text-center">
+            <div class="modal-header justify-content-center">
+                <i class="fas fa-check-circle text-success" style="font-size: 60px;"></i>
+            </div>
+            <div class="modal-body">
+                <h3 class="font-weight-bold">🎉 Booking Successful!</h3>
+                <p class="text-muted">Your booking has been successfully registered! Redirecting to login page...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#successModal").modal("show");
+        setTimeout(function() {
+            window.location.href = "{% url 'login' %}";
+        }, 3000);
+    });
+</script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+    const submitButton = document.getElementById("confirm-btn");
+
+    form.addEventListener("submit", function () {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+    });
+});
+</script>
+
+{% endblock %}

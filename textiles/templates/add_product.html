@@ -1,0 +1,145 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .form-container {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 50px;
+        margin-bottom: 50px;
+        backdrop-filter: blur(10px);
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .page-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #4b4b4b;
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        background-color: #fcfcfc;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #6c5ce7;
+        box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.1);
+        background-color: #fff;
+    }
+
+    .btn-submit {
+        background: var(--main-gradient);
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        margin-top: 20px;
+        color: white !important;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .custom-file-label {
+        border-radius: 12px;
+    }
+</style>
+
+<div class="container">
+    <div class="form-container">
+        <div class="page-header">
+            <h2>Add New Product</h2>
+            <p class="text-muted">Fill in the details to expand your catalog</p>
+        </div>
+
+        <form method="post" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="pname">Product Name</label>
+                    <input type="text" class="form-control" id="pname" name="pname" placeholder="Enter product title" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="pimg">Product Image</label>
+                    <input type="file" class="form-control" id="pimg" name="img" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="pcat">Category</label>
+                    <select class="form-control" id="pcat" name="cat" required>
+                        <option value="" disabled selected>Select Category</option>
+                        {% for i in cat %}
+                        <option value="{{ i.name }}">{{ i.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="pprice">Price (₹)</label>
+                    <input type="number" class="form-control" id="pprice" name="price" placeholder="e.g. 500" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pdesc">Description</label>
+                <textarea class="form-control" id="pdesc" name="desc" rows="4" placeholder="Enter detailed description..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-submit">Save Product</button>
+        </form>
+    </div>
+</div>
+
+{% if error %}
+<script>
+    alert('Product Added Successfully');
+</script>
+{% endif %}
+
+{% endblock %}

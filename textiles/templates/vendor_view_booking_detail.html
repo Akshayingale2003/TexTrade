@@ -1,0 +1,169 @@
+{% extends 'navigation.html' %}
+{% block body %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .section-card {
+        background: var(--glass-bg);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 40px 0 20px;
+        text-align: center;
+    }
+
+    .product-item {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #f1f2f6;
+        transition: 0.3s;
+    }
+
+    .product-item:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    .product-img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 10px;
+        border: 1px solid #eee;
+    }
+
+    .price-badge {
+        color: #6c5ce7;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .total-banner {
+        background: var(--main-gradient);
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 1.2rem;
+        display: inline-block;
+        min-width: 250px;
+        box-shadow: 0 10px 20px rgba(108, 92, 231, 0.2);
+    }
+
+    .info-label {
+        font-weight: 700;
+        color: #636e72;
+        text-transform: uppercase;
+        font-size: 12px;
+        display: block;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #2d3436;
+        font-size: 16px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .status-badge {
+        background: #e1f5fe;
+        color: #039be5;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 12px;
+    }
+</style>
+
+<div class="container">
+    <h2 class="page-title">Booking Details</h2>
+
+    <div class="section-card">
+        <h5 class="mb-4 font-weight-bold text-secondary"><i class="fas fa-box-open mr-2"></i>Items in this Order</h5>
+        {% for i in product %}
+            {% if i.id in book %}
+                <div class="product-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <img src="{{i.image.url}}" class="product-img" alt="{{i.name}}">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 class="font-weight-bold mb-1">{{i.name}}</h5>
+                            <p class="text-muted small mb-0">{{i.desc}}</p>
+                            <span class="price-badge">Rs. {{i.price}}</span>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <span class="status-badge">BOOKED SUCCESSFULLY</span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="text-right mt-4">
+            <div class="total-banner">
+                Total Amount: Rs. {{total}}
+            </div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h5 class="mb-4 font-weight-bold text-secondary"><i class="fas fa-user-circle mr-2"></i>Customer Information</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <span class="info-label">Customer Name</span>
+                <span class="info-value">{{profile.user.first_name}} {{profile.user.last_name}}</span>
+            </div>
+            <div class="col-md-4">
+                <span class="info-label">Contact Email</span>
+                <span class="info-value">{{profile.user.email}}</span>
+            </div>
+            <div class="col-md-4">
+                <span class="info-label">Phone Number</span>
+                <span class="info-value">{{profile.contact}}</span>
+            </div>
+            <div class="col-md-4">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">{{profile.dob}}</span>
+            </div>
+            <div class="col-md-4">
+                <span class="info-label">City</span>
+                <span class="info-value">{{profile.city}}</span>
+            </div>
+            <div class="col-md-4">
+                <span class="info-label">Full Address</span>
+                <span class="info-value">{{profile.address}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-5">
+        <a href="javascript:history.back()" class="btn btn-outline-dark rounded-pill px-5 font-weight-bold">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Orders
+        </a>
+    </div>
+</div>
+
+{% endblock %}

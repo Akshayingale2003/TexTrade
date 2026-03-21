@@ -1,0 +1,182 @@
+{% extends 'navigation.html' %}
+{% load static %}
+{% block body %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    .contact-wrapper {
+        padding: 100px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .contact-header {
+        text-align: center;
+        margin-bottom: 60px;
+    }
+
+    .contact-header h2 {
+        font-weight: 800;
+        font-size: 2.5rem;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .contact-header hr {
+        width: 60px;
+        border-top: 4px solid #E6120E;
+        margin: 15px auto;
+    }
+
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        max-width: 1100px;
+        width: 100%;
+    }
+
+    .contact-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 50px 30px;
+        text-align: center;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #f1f1f1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .contact-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .contact-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: #E6120E;
+        transform: scaleX(0);
+        transition: 0.4s ease;
+    }
+
+    .contact-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .icon-box {
+        width: 70px;
+        height: 70px;
+        background: rgba(230, 18, 14, 0.05);
+        color: #E6120E;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        margin-bottom: 25px;
+        transition: 0.3s;
+    }
+
+    .contact-card:hover .icon-box {
+        background: #E6120E;
+        color: #fff;
+    }
+
+    .contact-card h4 {
+        font-weight: 700;
+        color: #2d3436;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .contact-card p {
+        color: #636e72;
+        font-weight: 500;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    a.contact-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .contact-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .contact-grid {
+            grid-template-columns: 1fr;
+        }
+        .contact-wrapper {
+            padding: 60px 20px;
+        }
+    }
+</style>
+
+<div class="contact-wrapper">
+    <div class="contact-header">
+        <h2>Get In Touch</h2>
+        <hr>
+        <p class="text-muted">We are here to help you with your textile trading needs</p>
+    </div>
+
+    <div class="contact-grid">
+        <div class="contact-card">
+            <div class="icon-box">
+                <i class="fas fa-phone-alt"></i>
+            </div>
+            <h4>Call Us</h4>
+            <p>+91 8602768216</p>
+        </div>
+
+        <a href="mailto:myemail@gmail.com" class="contact-link">
+            <div class="contact-card">
+                <div class="icon-box">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <h4>Email Us</h4>
+                <p>myemail@gmail.com</p>
+            </div>
+        </a>
+
+        <a href="https://www.google.com/maps/search/?api=1&query=M.P.+Nagar" target="_blank" class="contact-link">
+            <div class="contact-card">
+                <div class="icon-box">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h4>Our Office</h4>
+                <p>📍 M.P. Nagar, India</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+{% endblock %}

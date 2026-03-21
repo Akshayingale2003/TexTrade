@@ -1,0 +1,177 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .product-container {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    .product-image-wrapper {
+        padding: 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: 0.3s;
+    }
+
+    .product-image-wrapper:hover {
+        transform: translateY(-5px);
+    }
+
+    .img-fluid.product-image {
+        border-radius: 15px;
+        max-height: 500px;
+        object-fit: contain;
+    }
+
+    .price-tag {
+        font-size: 2rem;
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 15px 0;
+    }
+
+    .category-badge {
+        background: #f1f2f6;
+        color: #6c5ce7;
+        font-weight: 700;
+        padding: 6px 15px;
+        border-radius: 50px;
+        font-size: 14px;
+        display: inline-block;
+    }
+
+    .btn-add-to-cart {
+        background: var(--main-gradient);
+        border: none;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 15px 30px;
+        color: white !important;
+        border-radius: 12px;
+        transition: 0.3s;
+        box-shadow: 0 8px 15px rgba(108, 92, 231, 0.2);
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .btn-add-to-cart:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .review-card {
+        border: none;
+        background: #fff;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        transition: 0.2s;
+    }
+
+    .review-card:hover {
+        background: #fcfaff;
+    }
+
+    .rating-stars {
+        color: #fdcb6e;
+    }
+
+    .section-title {
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 25px;
+        color: #2d3436;
+    }
+</style>
+
+<div class="container">
+    <div class="product-container">
+        <div class="row">
+            <div class="col-md-6 text-center mb-4 mb-md-0">
+                <div class="product-image-wrapper">
+                    <img src="{{ product.image.url }}" class="img-fluid product-image" alt="{{ product.name }}">
+                </div>
+            </div>
+
+            <div class="col-md-6 pl-lg-5">
+                <div class="category-badge mb-2">
+                    <i class="fas fa-tag mr-1"></i> {{ product.category.name }}
+                </div>
+                
+                <h1 class="section-title">{{ product.name }}</h1>
+                
+                <div class="price-tag">
+                    ₹ {{ product.price }}
+                </div>
+
+                <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">
+                    {{ product.desc }}
+                </p>
+
+                <form action="{% url 'add_cart' product.id %}" method="post" class="mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-add-to-cart">
+                        <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <hr class="my-5" style="opacity: 0.1;">
+
+        <div class="row">
+            <div class="col-12">
+                <h3 class="section-title">
+                    <i class="fas fa-star text-warning mr-2"></i>Customer Reviews
+                </h3>
+                
+                {% if reviews %}
+                    <div class="list-group">
+                        {% for review in reviews %}
+                            <div class="list-group-item review-card p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0 font-weight-bold">{{ review.user.username }}</h5>
+                                    <span class="rating-stars">
+                                        {% for _ in "12345"|slice:review.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                <p class="mb-0 text-secondary">{{ review.comment }}</p>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="far fa-clock mr-1"></i> {{ review.created_at|date:"F d, Y" }}
+                                </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="far fa-comment-dots fa-3x text-light mb-3"></i>
+                        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

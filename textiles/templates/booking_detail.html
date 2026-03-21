@@ -1,0 +1,178 @@
+{% extends 'navigation.html' %}
+
+{% block body %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .page-title {
+        margin-top: 100px;
+        font-weight: 700;
+        color: #E6120E;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Action Bar Styling */
+    .action-bar {
+        margin-bottom: 30px;
+    }
+
+    .btn-custom-info {
+        background-color: #17a2b8;
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px;
+        transition: 0.3s;
+        border: none;
+    }
+
+    .btn-custom-info:hover {
+        background-color: #138496;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .total-display {
+        border: 2px solid #343a40;
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 10px;
+        background: white;
+        color: #343a40;
+    }
+
+    /* Product Card Styling */
+    .booking-card {
+        background: white;
+        border: none;
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+        overflow: hidden;
+    }
+
+    .booking-card:hover {
+        transform: scale(1.01);
+    }
+
+    .product-img-wrapper {
+        background: #f1f1f1;
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-img {
+        max-height: 140px;
+        width: auto;
+        mix-blend-mode: multiply;
+    }
+
+    .badge-status {
+        font-size: 0.85rem;
+        padding: 8px 15px;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .badge-placed { background-color: #e3f2fd; color: #0d47a1; }
+    .badge-delivered { background-color: #d4edda; color: #155724; }
+    .badge-cancelled { background-color: #f8d7da; color: #721c24; }
+    .badge-other { background-color: #e9ecef; color: #495057; }
+
+    .btn-review {
+        background: #E6120E;
+        color: white;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 8px 20px;
+        transition: 0.3s;
+    }
+
+    .btn-review:hover {
+        background: #c40f0c;
+        color: white;
+    }
+</style>
+
+<div class="container text-center">
+    <h2 class="page-title">Order Details</h2>
+    <hr style="width: 100px; border-top: 3px solid #E6120E;">
+</div>
+
+<div class="container action-bar mt-4">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <a href="{% url 'view_product' 0 %}" class="btn btn-block btn-custom-info">
+                <i class="fa fa-shopping-basket mr-2"></i> Continue Shopping
+            </a>
+        </div>
+        <div class="col-md-6 mb-3 text-center">
+            <div class="total-display">
+                <i class="fas fa-receipt mr-2"></i> Grand Total: ₹{{ total_price }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% for i in products %}
+    <div class="card booking-card shadow-sm mb-4 p-4">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-3 mb-md-0">
+                <div class="product-img-wrapper">
+                    <img src="{{ i.image.url }}" class="product-img img-fluid" alt="{{ i.name }}">
+                </div>
+            </div>
+            
+            <div class="col-md-5">
+                <h4 class="font-weight-bold mb-1">{{ i.name }}</h4>
+                <p class="text-muted small mb-2">{{ i.desc|truncatechars:100 }}</p>
+                <h5 class="text-danger font-weight-bold">₹{{ i.price }}</h5>
+            </div>
+            
+            <div class="col-md-4 text-center text-md-right">
+                <div class="mb-3">
+                    <span class="text-muted d-block small mb-1">Status</span>
+                    {% if booking.status.name == "Placed" %}
+                        <span class="badge badge-status badge-placed"><i class="fas fa-clock mr-1"></i> Placed</span>
+                    {% elif booking.status.name == "Delivered" %}
+                        <span class="badge badge-status badge-delivered"><i class="fas fa-check-circle mr-1"></i> Delivered</span>
+                    {% elif booking.status.name == "Cancelled" %}
+                        <span class="badge badge-status badge-cancelled"><i class="fas fa-times-circle mr-1"></i> Cancelled</span>
+                    {% else %}
+                        <span class="badge badge-status badge-other">{{ booking.status.name }}</span>
+                    {% endif %}
+                </div>
+                
+                {% if booking.status.name == "Placed" %}
+                    <a href="{% url 'add_review' booking.id i.id %}" class="btn btn-review">
+                        <i class="fa fa-star mr-1"></i> Write a Review
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'view_product' 0 %}" class="btn btn-block btn-dark py-3" style="border-radius: 15px; font-weight: 600;">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Catalog
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

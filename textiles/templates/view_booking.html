@@ -1,0 +1,183 @@
+{% extends 'navigation.html' %}
+{% block body %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .booking-container {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 40px;
+        margin-bottom: 40px;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Table Styling */
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        width: 100%;
+    }
+
+    .custom-table thead th {
+        background: transparent;
+        border: none;
+        color: #636e72;
+        text-transform: uppercase;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .custom-table tbody tr {
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        transition: 0.3s;
+    }
+
+    .custom-table tbody tr:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.1);
+    }
+
+    .custom-table td {
+        vertical-align: middle;
+        padding: 15px;
+        border: none;
+        color: #2d3436;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .custom-table td:first-child { border-radius: 15px 0 0 15px; }
+    .custom-table td:last-child { border-radius: 0 15px 15px 0; }
+
+    /* Status Badge logic */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 800;
+        background: #f1f2f6;
+        color: #6c5ce7;
+        text-transform: uppercase;
+    }
+
+    /* Button Styling */
+    .btn-detail {
+        background: #6c5ce7;
+        color: white !important;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 15px;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: #ff7675;
+        color: white !important;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 15px;
+        border: none;
+    }
+
+    .btn-review {
+        background: var(--main-gradient);
+        color: white !important;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border: none;
+        margin-bottom: 2px;
+        display: inline-block;
+    }
+</style>
+
+<div class="container">
+    <div class="booking-container">
+        <div class="page-header">
+            <h2>Order History</h2>
+            <p class="text-muted">Track and manage your recent purchases</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table" id="myTable">
+                <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Booking ID</th>
+                        <th>Date</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>View</th>
+                        <th>Action</th>
+                        <th>Review Items</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in book %}
+                    <tr>
+                        <td class="text-muted">{{ forloop.counter }}</td>
+                        <td class="font-weight-bold">#{{ i.booking_id }}</td>
+                        <td class="small">{{ i.book_date }}</td>
+                        <td>{{ i.quantity }}</td>
+                        <td class="font-weight-bold text-dark">₹{{ i.total }}</td>
+                        <td><span class="status-badge">{{ i.status.name }}</span></td>
+                        
+                        <td>
+                            <a href="{% url 'booking_detail' i.booking_id i.id %}">
+                                <button class="btn-detail">Detail</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'delete_booking' i.booking_id i.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                <button class="btn-cancel">Cancel</button>
+                            </a>
+                        </td>
+                        <td>
+                            {% for product in i.products.all %}
+                                <a href="{% url 'add_review' i.booking_id product.id %}">
+                                    <button class="btn-review">Rate Product</button>
+                                </a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

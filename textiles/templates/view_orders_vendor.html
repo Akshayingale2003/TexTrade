@@ -1,0 +1,202 @@
+{% extends 'navigation.html' %}
+{% block body %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .orders-vendor-container {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 40px;
+        margin-bottom: 40px;
+        backdrop-filter: blur(10px);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Table Styling */
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 12px;
+        width: 100%;
+    }
+
+    .custom-table thead th {
+        background: transparent;
+        border: none;
+        color: #636e72;
+        text-transform: uppercase;
+        font-size: 11px;
+        font-weight: 800;
+        padding: 15px;
+        text-align: center;
+    }
+
+    .custom-table tbody tr {
+        background: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        transition: 0.3s;
+    }
+
+    .custom-table tbody tr:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.1);
+    }
+
+    .custom-table td {
+        vertical-align: middle;
+        padding: 15px;
+        border: none;
+        color: #2d3436;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .custom-table td:first-child { border-radius: 15px 0 0 15px; }
+    .custom-table td:last-child { border-radius: 0 15px 15px 0; }
+
+    /* Button Styling */
+    .btn-status {
+        background: #f1f2f6;
+        color: #6c5ce7 !important;
+        border: 2px solid #6c5ce7;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 5px 12px;
+        text-transform: uppercase;
+        transition: 0.3s;
+        width: 100%;
+    }
+
+    .btn-status:hover {
+        background: #6c5ce7;
+        color: white !important;
+    }
+
+    .btn-detail {
+        background: #a29bfe;
+        color: white !important;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 15px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .btn-cancel {
+        background: #ff7675;
+        color: white !important;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 15px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+    .btn-detail:hover, .btn-cancel:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+
+    .user-tag {
+        font-weight: 700;
+        color: #2d3436;
+        display: block;
+    }
+
+    .email-tag {
+        font-size: 12px;
+        color: #b2bec3;
+    }
+</style>
+
+<div class="container-fluid px-5">
+    <div class="orders-vendor-container">
+        <div class="page-header">
+            <h2>Vendor Order Dashboard</h2>
+            <p class="text-muted">Manage incoming orders and update delivery status</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table" id="myTable">
+                <thead>
+                    <tr>
+                        <th>Sr. No</th>
+                        <th>Booking ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>View</th>
+                        <!-- <th>Action</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in book %}
+                    <tr>
+                        <td class="text-muted">{{forloop.counter}}</td>
+                        <td class="font-weight-bold text-primary">#{{i.booking_id}}</td>
+                        <td class="small">{{i.book_date}}</td>
+                        <td>
+                            <span class="user-tag">{{i.profile.user.username}}</span>
+                            <span class="email-tag">{{i.profile.user.email}}</span>
+                        </td>
+                        <td>{{i.quantity}}</td>
+                        <td class="font-weight-bold">₹{{i.total}}</td>
+                        
+                        <td>
+                            <a href="{% url 'Edit_status_vendor' i.booking_id i.id %}">
+                                <button class="btn-status">{{i.status.name}}</button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'vendor_view_booking_detail' i.booking_id i.id i.profile.user.id %}">
+                                <button class="btn-detail">Detail</button>
+                            </a>
+                        </td>
+                        <!-- <td>
+                            <a href="{% url 'delete_admin_booking' i.booking_id i.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                <button class="btn-cancel" id="#delete">Cancel</button>
+                            </a>
+                        </td> -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var el_up = document.getElementById("GFG_UP");
+    if (el_up) {
+        el_up.innerHTML = "Click on the LINK for further confirmation.";
+    }
+</script>
+
+{% endblock %}

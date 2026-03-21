@@ -1,0 +1,187 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar and Wrapper Layout */
+    #wrapper {
+        display: flex;
+        width: 100%;
+    }
+
+    #sidebar-wrapper {
+        min-height: 100vh;
+        margin-left: -15rem;
+        transition: margin .25s ease-out;
+        background: var(--glass-bg) !important;
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(0,0,0,0.05) !important;
+        width: 15rem;
+        flex-shrink: 0;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        width: 100%;
+        flex-grow: 1;
+    }
+
+    .sidebar-heading {
+        padding: 2rem 1.25rem;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #764ba2;
+        text-transform: uppercase;
+    }
+
+    .list-group-item-action {
+        border: none !important;
+        padding: 12px 20px !important;
+        font-weight: 600;
+        color: #636e72 !important;
+        background: transparent !important;
+    }
+
+    /* Product Cards */
+    .product-card {
+        background: white;
+        border-radius: 20px;
+        border: none;
+        overflow: hidden;
+        transition: 0.3s;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .img-container {
+        height: 200px;
+        background: #fdfdfd;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .product-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .card-body {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .price-tag {
+        font-weight: 800;
+        color: #2d3436;
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+
+    .btn-cart {
+        background: var(--main-gradient);
+        color: white !important;
+        border-radius: 10px;
+        font-weight: 700;
+        width: 100%;
+        border: none;
+    }
+
+    #menu-toggle {
+        background: var(--main-gradient);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 8px 20px;
+        margin: 15px;
+    }
+
+    @media (min-width: 768px) {
+        #sidebar-wrapper { margin-left: 0; }
+        #wrapper.toggled #sidebar-wrapper { margin-left: -15rem; }
+    }
+</style>
+
+<div class="d-flex" id="wrapper">
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading">Categories</div>
+        <div class="list-group list-group-flush">
+            <a href="{% url 'view_product' 0 %}" class="list-group-item list-group-item-action">All Products</a>
+            {% for i in cat %}
+                <a href="{% url 'view_product' i.id %}" class="list-group-item list-group-item-action">{{ i.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="page-content-wrapper">
+        <button class="btn" id="menu-toggle"><i class="fas fa-bars mr-2"></i> Filters</button>
+        
+        <div class="container-fluid px-4">
+            <h2 class="mb-4" style="font-weight: 800; color: #764ba2;">{{ cat1.name }}</h2>
+            <hr>
+
+            <div class="row">
+                {% for j in pro1 %}
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="product-card">
+                        <div class="img-container">
+                            <img src="{{ j.image.url }}" class="product-img" alt="Product">
+                        </div>
+                        <div class="card-body">
+                            <h5 style="font-weight: 700; height: 2.5em; overflow: hidden;">{{ j.name }}</h5>
+                            <div class="price-tag">Rs. {{ j.price }}</div>
+                            <p class="text-muted small">{{ j.desc|truncatechars:40 }}</p>
+                            
+                            <div class="mt-3">
+                                <a href="{% url 'product_detail' j.id %}" class="btn btn-sm btn-outline-secondary btn-block mb-2">View Details</a>
+                                <form action="{% url 'add_cart' j.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-cart">
+                                        <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center mt-5">
+                    <h4 class="text-muted">No products found.</h4>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    $("#menu-toggle").click(function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+</script>
+
+{% endblock %}

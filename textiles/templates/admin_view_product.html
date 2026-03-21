@@ -1,0 +1,208 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .table-container {
+        margin: 100px auto 50px;
+        max-width: 95%;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .page-title {
+        font-family: 'Monotype Corsiva', cursive;
+        color: #E6120E;
+        font-weight: bold;
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+
+    /* Search Bar Styling */
+    .search-wrapper {
+        position: relative;
+        margin-bottom: 25px;
+        max-width: 400px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        border-radius: 30px;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 15px rgba(0,123,255,0.1);
+        outline: none;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+    }
+
+    /* Professional Table Styling */
+    .custom-table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        width: 100%;
+    }
+
+    .custom-table thead th {
+        background-color: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        padding: 15px;
+        border: none;
+        letter-spacing: 0.5px;
+    }
+
+    .custom-table tbody tr {
+        background-color: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        transition: transform 0.2s;
+    }
+
+    .custom-table tbody tr:hover {
+        transform: scale(1.005);
+        background-color: #fcfcfc;
+    }
+
+    .custom-table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        color: #555;
+    }
+
+    /* Product Image */
+    .product-img-circle {
+        width: 55px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid #f1f1f1;
+    }
+
+    /* Action Buttons */
+    .btn-action {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: 0.3s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-edit {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .btn-edit:hover {
+        background-color: #1976d2;
+        color: white;
+    }
+
+    .btn-delete {
+        background-color: #ffebee;
+        color: #d32f2f;
+    }
+
+    .btn-delete:hover {
+        background-color: #d32f2f;
+        color: white;
+    }
+
+</style>
+
+<div class="container table-container">
+    <div class="text-center">
+        <h2 class="page-title">Inventory Management</h2>
+        <hr style="width: 80px; border-top: 3px solid #E6120E; margin-bottom: 40px;">
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="productSearch" class="search-input" placeholder="Search products or categories...">
+        </div>
+        <a href="{% url 'add_product' %}" class="btn btn-primary rounded-pill px-4">
+            <i class="fas fa-plus mr-2"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table custom-table" id="myTable">
+            <thead>
+                <tr>
+                    <th>Product Details</th>
+                    <th>Image</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th class="text-center">Manage</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for i in pro %}
+                <tr>
+                    <td class="font-weight-bold">{{ i.name }}</td>
+                    <td>
+                        <img src="{{ i.image.url }}" alt="{{ i.name }}" class="product-img-circle"
+                >
+                    </td>
+                    <td><span class="badge badge-light p-2">{{ i.category.name }}</span></td>
+                    <td class="text-success font-weight-bold">₹{{ i.price }}</td>
+                    <td><small class="text-muted">{{ i.desc|truncatechars:50 }}</small></td>
+                    <td class="text-center">
+                        <a href="{% url 'edit_product' i.id %}" class="text-decoration-none">
+                            <button class="btn-action btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                        </a>
+                        <a href="{% url 'delete_product' i.id %}" onclick="return confirm('Are you sure you want to delete this product?')" class="text-decoration-none ml-2">
+                            <button class="btn-action btn-delete"><i class="fas fa-trash-alt"></i> Delete</button>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('productSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#tableBody tr');
+        
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+
+{% endblock %}

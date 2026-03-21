@@ -1,0 +1,172 @@
+{% extends 'navigation.html' %} 
+{% block body %}
+{% load static %}
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .review-wrapper {
+        margin-top: 120px;
+        margin-bottom: 50px;
+    }
+
+    .review-container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Product Section Styling */
+    .product-details {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .product-title {
+        font-size: 26px;
+        font-weight: 600;
+        color: #2d3436;
+        margin-bottom: 15px;
+    }
+
+    .product-image {
+        border-radius: 15px;
+        max-width: 250px;
+        height: auto;
+        transition: transform 0.3s ease;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .product-image:hover {
+        transform: scale(1.05);
+    }
+
+    .product-price {
+        font-size: 22px;
+        font-weight: 600;
+        color: #28a745;
+        margin-top: 15px;
+    }
+
+    .divider {
+        height: 1px;
+        background: #eee;
+        margin: 30px 0;
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 600;
+        color: #4b4b4b;
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .rating-select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 2px solid #f1f1f1;
+        background-color: #f9f9f9;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        margin-bottom: 25px;
+    }
+
+    .rating-select:focus {
+        border-color: #ff4b2b;
+        outline: none;
+        background-color: #fff;
+    }
+
+    .review-textarea {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #f1f1f1;
+        background-color: #f9f9f9;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .review-textarea:focus {
+        border-color: #ff4b2b;
+        outline: none;
+        background-color: #fff;
+        box-shadow: 0 5px 15px rgba(255, 75, 43, 0.1);
+    }
+
+    .btn-submit {
+        display: block;
+        width: 100%;
+        background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        color: white;
+        border: none;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 25px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 75, 43, 0.3);
+        opacity: 0.9;
+    }
+</style>
+
+<div class="container review-wrapper">
+    <div class="review-container">
+        
+        <div class="product-details">
+            <h2 class="product-title">Rate your purchase: <br><span style="color: #ff4b2b;">{{ product.name }}</span></h2>
+            <img src="{{ product.image.url }}" class="product-image mt-3" alt="{{ product.name }}">
+            <p class="mt-3 text-muted" style="font-size: 0.95rem; max-width: 80%; margin-left: auto; margin-right: auto;">
+                {{ product.desc }}
+            </p>
+            <h4 class="product-price">₹ {{ product.price }}</h4>
+        </div>
+
+        <div class="divider"></div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">How would you rate this product?</label>
+                <select name="rating" class="rating-select" required>
+                    <option value="" disabled selected>Choose a rating...</option>
+                    <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                    <option value="4">⭐⭐⭐⭐ (Very Good)</option>
+                    <option value="3">⭐⭐⭐ (Average)</option>
+                    <option value="2">⭐⭐ (Poor)</option>
+                    <option value="1">⭐ (Terrible)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Tell us more about your experience</label>
+                <textarea name="comment" class="review-textarea" placeholder="What did you like or dislike? How is the quality?" required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Review</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

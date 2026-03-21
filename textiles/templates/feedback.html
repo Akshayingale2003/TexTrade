@@ -1,0 +1,178 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .feedback-wrapper {
+        margin-top: 80px;
+        margin-bottom: 60px;
+    }
+
+    .feedback-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        padding: 40px;
+        transition: 0.3s;
+    }
+
+    .feedback-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .feedback-icon-box {
+        width: 70px;
+        height: 70px;
+        background: rgba(230, 18, 14, 0.1);
+        color: #E6120E;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 20px;
+    }
+
+    .feedback-title {
+        font-weight: 700;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #E6120E;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: #636e72;
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    /* Styling for the readonly info */
+    .form-control-readonly {
+        background-color: #f8f9fa !important;
+        border: 1px solid #e9ecef;
+        color: #adb5bd;
+        border-radius: 10px;
+        padding: 12px 15px;
+        cursor: not-allowed;
+        font-weight: 500;
+    }
+
+    .form-control-custom {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #f1f1f1;
+        transition: 0.3s;
+    }
+
+    .form-control-custom:focus {
+        border-color: #E6120E;
+        box-shadow: 0 0 0 0.2rem rgba(230, 18, 14, 0.1);
+    }
+
+    .btn-send-feedback {
+        background: linear-gradient(135deg, #2d3436, #000);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1rem;
+        width: 100%;
+        margin-top: 10px;
+        transition: 0.3s;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .btn-send-feedback:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+        color: #fff;
+    }
+
+    textarea.form-control-custom {
+        min-height: 120px;
+    }
+</style>
+
+<div class="container feedback-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="feedback-card">
+                <div class="feedback-header">
+                    <div class="feedback-icon-box">
+                        <i class="fas fa-comment-alt"></i>
+                    </div>
+                    <h3 class="feedback-title">Send Your Feedback</h3>
+                    <p class="text-muted small">Your suggestions help us improve our services</p>
+                </div>
+
+                <form method="post" action="" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-section-title">Your Details</div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-calendar-day mr-1"></i> Submission Date</label>
+                            <input type="text" class="form-control form-control-readonly" name="date" value="{{date1}}" readonly>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-user mr-1"></i> Username</label>
+                            <input type="text" class="form-control form-control-readonly" name="uname" value="{{request.user.username}}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-envelope mr-1"></i> Registered Email</label>
+                            <input type="email" class="form-control form-control-readonly" name="email" value="{{request.user.email}}" readonly>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label><i class="fas fa-phone mr-1"></i> Contact Number</label>
+                            <input type="number" class="form-control form-control-readonly" name="contact" value="{{pro.contact}}" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">Message</div>
+                    <div class="form-group">
+                        <label>How can we improve?</label>
+                        <textarea class="form-control form-control-custom" name="desc" placeholder="Write your feedback here..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-send-feedback">
+                        <i class="fas fa-paper-plane mr-2"></i> Submit Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    {% if error %}
+        alert('✅ Thank you! Your feedback has been submitted successfully.');
+        window.location.href = "{% url 'feedback' %}";
+    {% endif %}
+</script>
+
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends 'navigation.html' %}
+{% block body %}
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+
+<style>
+    body {
+        background-color: #f4f7f6;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .cart-wrapper {
+        margin-top: 100px;
+        margin-bottom: 80px;
+    }
+
+    .cart-header-title {
+        font-weight: 700;
+        color: #2d3436;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 40px;
+    }
+
+    .cart-header-title span {
+        color: #E6120E;
+    }
+
+    /* Empty Cart State */
+    .cart-empty-state {
+        background: white;
+        padding: 60px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        margin-top: 50px;
+    }
+
+    .cart-empty-state ion-icon {
+        font-size: 80px;
+        color: #dfe6e9;
+        margin-bottom: 20px;
+    }
+
+    /* Cart Item Card */
+    .cart-card {
+        background: white;
+        border: none;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+    }
+
+    .cart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    .cart-img-container {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 10px;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cart-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .item-details h5 {
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #2d3436;
+    }
+
+    .item-price {
+        color: #E6120E;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Buttons */
+    .btn-custom {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px 25px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.3s;
+    }
+
+    .btn-remove {
+        color: #ff7675;
+        background: transparent;
+        border: 1px solid #fab1a0;
+    }
+
+    .btn-remove:hover {
+        background: #ff7675;
+        color: white;
+        border-color: #ff7675;
+    }
+
+    /* Checkout Bar */
+    .checkout-bar {
+        background: #2d3436;
+        color: white;
+        padding: 25px;
+        border-radius: 20px;
+        margin-top: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .cart-total-text {
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    .cart-total-text span {
+        color: #E6120E;
+    }
+
+    .btn-checkout {
+        background: #E6120E;
+        color: white;
+        border: none;
+        width: 100%;
+    }
+
+    .btn-checkout:hover {
+        background: #c40f0c;
+        color: white;
+        transform: scale(1.02);
+    }
+
+    .btn-continue {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.2);
+        width: 100%;
+    }
+
+    .btn-continue:hover {
+        background: white;
+        color: #2d3436;
+    }
+</style>
+
+<div class="container cart-wrapper">
+    <h2 class="text-center cart-header-title">My <span>Shopping Cart</span></h2>
+
+    {% if not cart %}
+        <div class="text-center cart-empty-state">
+            <ion-icon name="cart-outline"></ion-icon>
+            <h3>Your cart is empty!</h3>
+            <p class="text-muted">Looks like you haven't added anything yet.</p>
+            <a href="{% url 'view_product' 0 %}" class="btn btn-danger btn-custom mt-3">
+                Start Shopping
+            </a>
+        </div>
+    {% else %}
+        
+        <div class="row">
+            <div class="col-lg-8">
+                {% for i in cart %}
+                <div class="cart-card">
+                    <div class="row w-100 align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="cart-img-container">
+                                <img src="{{ i.product.image.url }}" class="cart-img">
+                            </div>
+                        </div>
+                        <div class="col-md-6 item-details">
+                            <h5>{{ i.product.name }}</h5>
+                            <div class="item-price">₹{{ i.product.price }}</div>
+                            <p class="text-muted small mt-2">{{ i.product.desc|truncatechars:80 }}</p>
+                        </div>
+                        <div class="col-md-3 text-right">
+                            <a href="{% url 'remove_cart' i.id %}" class="btn btn-remove btn-custom">
+                                <ion-icon name="trash-outline"></ion-icon> Remove
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-4">
+                <div class="checkout-bar">
+                    <h4 class="mb-4">Order Summary</h4>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Items:</span>
+                        <span>{{ cart|length }}</span>
+                    </div>
+                    <hr style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="cart-total-text">Total:</span>
+                        <span class="cart-total-text"><span>₹{{ total }}</span></span>
+                    </div>
+                    
+                    <a href="{% url 'booking' book %}" class="btn btn-checkout btn-custom mb-3">
+                        <ion-icon name="cash-outline"></ion-icon> Proceed to Buy
+                    </a>
+                    
+                    <a href="{% url 'view_product' 0 %}" class="btn btn-continue btn-custom">
+                        <ion-icon name="arrow-back-outline"></ion-icon> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+</div>
+
+{% endblock %}

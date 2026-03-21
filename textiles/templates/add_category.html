@@ -1,0 +1,83 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+{% if error %}
+<script>
+    alert('One New Category Added Successfully');
+</script>
+{% endif %}
+
+<style>
+    .form-wrapper {
+        margin-top: 100px;
+        margin-bottom: 50px;
+    }
+
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        padding: 25px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
+        border-color: #007bff;
+    }
+
+    .btn-submit {
+        background: #28a745;
+        border: none;
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background 0.3s ease;
+        color: white;
+    }
+
+    .btn-submit:hover {
+        background: #218838;
+        color: white;
+    }
+</style>
+
+<div class="container form-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-header text-white text-center">
+                    <h3 class="mb-0" style="font-family: 'Poppins', sans-serif;">Add New Category</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label for="categoryName" class="font-weight-bold text-secondary">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" name="cat" placeholder="e.g. Cotton, Silk, Polyester" required>
+                        </div>
+                        <button type="submit" class="btn btn-submit btn-block">Add Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

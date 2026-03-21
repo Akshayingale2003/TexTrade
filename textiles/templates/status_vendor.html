@@ -1,0 +1,140 @@
+{% extends 'navigation.html' %}
+{% block body %}
+{% load static %}
+
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .status-container {
+        max-width: 600px;
+        margin: 80px auto;
+        background: var(--glass-bg);
+        border-radius: 24px;
+        padding: 40px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        border: 1px solid rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
+    }
+
+    .status-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .status-header h2 {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 28px;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #636e72;
+        font-size: 14px;
+        margin-bottom: 10px;
+        margin-left: 5px;
+    }
+
+    .form-control {
+        border-radius: 12px !important;
+        padding: 12px 15px !important;
+        border: 1px solid #dfe6e9 !important;
+        height: auto !important;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: #6c5ce7 !important;
+        box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.1) !important;
+    }
+
+    /* Styling the Read-only input */
+    input[readonly], input[name="book"] {
+        background-color: #f1f2f6 !important;
+        color: #2d3436;
+        cursor: not-allowed;
+    }
+
+    .btn-update {
+        background: var(--main-gradient);
+        color: white !important;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        font-weight: 700;
+        font-size: 16px;
+        width: 100%;
+        margin-top: 20px;
+        transition: 0.3s;
+        box-shadow: 0 8px 15px rgba(108, 92, 231, 0.2);
+    }
+
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .badge-info-custom {
+        background: rgba(108, 92, 231, 0.1);
+        color: #6c5ce7;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 12px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+</style>
+
+<div class="container">
+    <div class="status-container">
+        <div class="status-header">
+            <span class="badge-info-custom"><i class="fas fa-edit mr-1"></i> Management Portal</span>
+            <br>
+            <h2>Update Booking Status</h2>
+        </div>
+
+        <form method="post" action="">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="bookingId">Booking ID</label>
+                <input type="text" class="form-control" id="bookingId" name="book" value="{{book.booking_id}}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="inputState">New Status Selection</label>
+                <select id="inputState" class="form-control" name="status" required>
+                    <option value="" disabled selected>Choose the current status...</option>
+                    {% for i in stat %}
+                        <option value="{{i.name}}">{{i.name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-update">
+                <i class="fas fa-save mr-2"></i> Confirm Status Change
+            </button>
+            
+            <div class="text-center mt-4">
+                <a href="javascript:history.back()" class="text-muted small">
+                    <i class="fas fa-arrow-left mr-1"></i> Cancel and go back
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
