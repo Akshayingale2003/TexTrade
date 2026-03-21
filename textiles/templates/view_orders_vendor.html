@@ -160,30 +160,26 @@
                     {% for i in book %}
                     <tr>
                         <td class="text-muted">{{forloop.counter}}</td>
-                        <td class="font-weight-bold text-primary">#{{i.booking_id}}</td>
-                        <td class="small">{{i.book_date}}</td>
+                        <td class="font-weight-bold text-primary">#{{i.booking.booking_id}}</td>
+                        <td class="small">{{i.booking.book_date}}</td>
                         <td>
-                            <span class="user-tag">{{i.profile.user.username}}</span>
-                            <span class="email-tag">{{i.profile.user.email}}</span>
+                            <span class="user-tag">{{i.booking.profile.user.username}}</span>
+                            <span class="email-tag">{{i.booking.profile.user.email}}</span>
                         </td>
                         <td>{{i.quantity}}</td>
-                        <td class="font-weight-bold">₹{{i.total}}</td>
+                        <td class="font-weight-bold">₹{{i.booking.total}}</td>
                         
                         <td>
-                            <a href="{% url 'Edit_status_vendor' i.booking_id i.id %}">
-                                <button class="btn-status">{{i.status.name}}</button>
+                            <a href="{% url 'Edit_status_vendor' i.booking.booking_id i.booking.id %}">
+                                <button class="btn-status">{{i.booking.status}}</button>
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'vendor_view_booking_detail' i.booking_id i.id i.profile.user.id %}">
+                            <a href="{% url 'vendor_view_booking_detail' i.booking.booking_id i.booking.id i.booking.profile.user.id %}">
                                 <button class="btn-detail">Detail</button>
                             </a>
                         </td>
-                        <!-- <td>
-                            <a href="{% url 'delete_admin_booking' i.booking_id i.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')">
-                                <button class="btn-cancel" id="#delete">Cancel</button>
-                            </a>
-                        </td> -->
+                     
                     </tr>
                     {% endfor %}
                 </tbody>

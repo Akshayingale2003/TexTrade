@@ -6,6 +6,7 @@
     :root {
         --glass-bg: rgba(255, 255, 255, 0.95);
         --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-purple: #6c5ce7;
     }
 
     body {
@@ -20,6 +21,7 @@
         border: 1px solid rgba(0,0,0,0.05);
         margin-top: 40px;
         margin-bottom: 40px;
+        backdrop-filter: blur(10px);
     }
 
     .product-image-wrapper {
@@ -30,10 +32,6 @@
         transition: 0.3s;
     }
 
-    .product-image-wrapper:hover {
-        transform: translateY(-5px);
-    }
-
     .img-fluid.product-image {
         border-radius: 15px;
         max-height: 500px;
@@ -41,17 +39,17 @@
     }
 
     .price-tag {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 800;
         background: var(--main-gradient);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin: 15px 0;
+        margin: 10px 0;
     }
 
     .category-badge {
         background: #f1f2f6;
-        color: #6c5ce7;
+        color: var(--accent-purple);
         font-weight: 700;
         padding: 6px 15px;
         border-radius: 50px;
@@ -59,18 +57,70 @@
         display: inline-block;
     }
 
+    /* Quantity Styling */
+    .qty-label {
+        font-weight: 700;
+        color: #2d3436;
+        margin-bottom: 10px;
+        display: block;
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+
+    .qty-selector {
+        display: flex;
+        align-items: center;
+        background: #f1f2f6;
+        border-radius: 12px;
+        padding: 5px;
+        width: fit-content;
+        margin-bottom: 25px;
+    }
+
+    .qty-input {
+        width: 60px;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-weight: 700;
+        font-size: 18px;
+        color: #2d3436;
+    }
+
+    .qty-input:focus { outline: none; }
+
+    .qty-btn {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border: none;
+        border-radius: 10px;
+        color: var(--accent-purple);
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .qty-btn:hover {
+        background: var(--accent-purple);
+        color: white;
+    }
+
     .btn-add-to-cart {
         background: var(--main-gradient);
         border: none;
         font-size: 18px;
         font-weight: 700;
-        padding: 15px 30px;
+        padding: 15px 40px;
         color: white !important;
         border-radius: 12px;
         transition: 0.3s;
         box-shadow: 0 8px 15px rgba(108, 92, 231, 0.2);
         width: 100%;
-        max-width: 300px;
     }
 
     .btn-add-to-cart:hover {
@@ -84,21 +134,10 @@
         border-radius: 15px;
         margin-bottom: 15px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-        transition: 0.2s;
-    }
-
-    .review-card:hover {
-        background: #fcfaff;
-    }
-
-    .rating-stars {
-        color: #fdcb6e;
     }
 
     .section-title {
         font-weight: 800;
-        letter-spacing: -0.5px;
-        margin-bottom: 25px;
         color: #2d3436;
     }
 </style>
@@ -106,29 +145,43 @@
 <div class="container">
     <div class="product-container">
         <div class="row">
+            <!-- Product Image -->
             <div class="col-md-6 text-center mb-4 mb-md-0">
                 <div class="product-image-wrapper">
                     <img src="{{ product.image.url }}" class="img-fluid product-image" alt="{{ product.name }}">
                 </div>
             </div>
 
+            <!-- Product Details -->
             <div class="col-md-6 pl-lg-5">
                 <div class="category-badge mb-2">
                     <i class="fas fa-tag mr-1"></i> {{ product.category.name }}
                 </div>
                 
-                <h1 class="section-title">{{ product.name }}</h1>
+                <h1 class="section-title mb-3">{{ product.name }}</h1>
                 
                 <div class="price-tag">
                     ₹ {{ product.price }}
                 </div>
 
-                <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">
+                <p class="text-muted mt-3 mb-4" style="font-size: 1.1rem; line-height: 1.6;">
                     {{ product.desc }}
                 </p>
 
-                <form action="{% url 'add_cart' product.id %}" method="post" class="mt-4">
+                <form action="{% url 'add_cart' product.id %}" method="post">
                     {% csrf_token %}
+                    
+                    <label class="qty-label">Select Quantity</label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="decrementQty()">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" class="qty-input">
+                        <button type="button" class="qty-btn" onclick="incrementQty()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+
                     <button type="submit" class="btn btn-add-to-cart">
                         <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                     </button>
@@ -138,11 +191,14 @@
 
         <hr class="my-5" style="opacity: 0.1;">
 
+        <!-- Reviews Section -->
         <div class="row">
             <div class="col-12">
-                <h3 class="section-title">
-                    <i class="fas fa-star text-warning mr-2"></i>Customer Reviews
-                </h3>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="section-title mb-0">
+                        <i class="fas fa-star text-warning mr-2"></i>Customer Reviews
+                    </h3>
+                </div>
                 
                 {% if reviews %}
                     <div class="list-group">
@@ -150,7 +206,7 @@
                             <div class="list-group-item review-card p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <h5 class="mb-0 font-weight-bold">{{ review.user.username }}</h5>
-                                    <span class="rating-stars">
+                                    <span class="text-warning">
                                         {% for _ in "12345"|slice:review.rating %}
                                             <i class="fas fa-star"></i>
                                         {% endfor %}
@@ -166,12 +222,26 @@
                 {% else %}
                     <div class="text-center py-5">
                         <i class="far fa-comment-dots fa-3x text-light mb-3"></i>
-                        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                        <p class="text-muted">No reviews yet. Share your thoughts!</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function incrementQty() {
+        var qtyInput = document.getElementById('quantity');
+        qtyInput.value = parseInt(qtyInput.value) + 1;
+    }
+
+    function decrementQty() {
+        var qtyInput = document.getElementById('quantity');
+        if (parseInt(qtyInput.value) > 1) {
+            qtyInput.value = parseInt(qtyInput.value) - 1;
+        }
+    }
+</script>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Booking, Profile, Vendor, Send_Feedback, Status, Cart , Admin  # Import models explicitly
+from .models import Category, Product, Booking, Profile, Vendor, Send_Feedback, Cart , Admin , BookingItem , Payment, Review # Import models explicitly
 
 # Register models normally
 admin.site.register(Category)
@@ -8,8 +8,10 @@ admin.site.register(Profile)
 admin.site.register(Vendor)
 admin.site.register(Admin)
 admin.site.register(Send_Feedback)
-admin.site.register(Status)
 admin.site.register(Cart)
+admin.site.register(BookingItem)
+admin.site.register(Payment)
+admin.site.register(Review)
 
 # Register Booking model with custom admin configuration
 @admin.register(Booking)

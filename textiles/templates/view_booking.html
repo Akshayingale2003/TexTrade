@@ -137,7 +137,6 @@
                         <th>Sr. No</th>
                         <th>Booking ID</th>
                         <th>Date</th>
-                        <th>Qty</th>
                         <th>Total</th>
                         <th>Status</th>
                         <th>View</th>
@@ -151,9 +150,8 @@
                         <td class="text-muted">{{ forloop.counter }}</td>
                         <td class="font-weight-bold">#{{ i.booking_id }}</td>
                         <td class="small">{{ i.book_date }}</td>
-                        <td>{{ i.quantity }}</td>
                         <td class="font-weight-bold text-dark">₹{{ i.total }}</td>
-                        <td><span class="status-badge">{{ i.status.name }}</span></td>
+                        <td><span class="status-badge">{{ i.status }}</span></td>
                         
                         <td>
                             <a href="{% url 'booking_detail' i.booking_id i.id %}">

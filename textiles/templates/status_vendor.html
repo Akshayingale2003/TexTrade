@@ -118,9 +118,14 @@
                 <label for="inputState">New Status Selection</label>
                 <select id="inputState" class="form-control" name="status" required>
                     <option value="" disabled selected>Choose the current status...</option>
-                    {% for i in stat %}
-                        <option value="{{i.name}}">{{i.name}}</option>
-                    {% endfor %}
+          
+                    <option value="processing">processing</option>
+                        <option value="packed">packed</option>
+                        <option value="shipped">shipped</option>
+                        <option value="reached destination">reached destination</option>
+                        <option value="out for delivery">out for delivery</option>
+                        <option value="delivered">delivered</option>
+                        <option value="cancelled by provider">cancel</option>
                 </select>
             </div>
 

@@ -122,7 +122,6 @@
                     <th>Order ID</th>
                     <th>Booking Date</th>
                     <th>Customer Name</th>
-                    <th>Quantity</th>
                     <th>Total Price</th>
                     <th>Status</th>
                     <th class="text-center">Details</th>
@@ -133,35 +132,34 @@
                 {% for i in book %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td class="font-weight-bold text-primary">#{{ i.booking_id }}</td>
-                    <td>{{ i.book_date }}</td>
+                    <td class="font-weight-bold text-primary">#{{ i.booking.booking_id }}</td>
+                    <td>{{ i.booking.book_date }}</td>
                     <td>
                         <div class="d-flex flex-column">
-                            <span>{{ i.profile.user.username }}</span>
-                            <small class="text-muted">{{ i.profile.user.email }}</small>
+                            <span>{{ i.booking.profile.user.username }}</span>
+                            <small class="text-muted">{{ i.booking.profile.user.email }}</small>
                         </div>
                     </td>
-                    <td>{{ i.quantity }}</td>
-                    <td class="font-weight-bold text-dark">₹ {{ i.total }}</td>
+                    <td class="font-weight-bold text-dark">₹ {{ i.booking.total }}</td>
                     <td>
-                        <a href="{% url 'Edit_status' i.booking_id i.id %}" class="text-decoration-none">
+                        <a href="{% url 'Edit_status' i.booking.booking_id i.booking.id %}" class="text-decoration-none">
                             <button class="status-pill 
-                                {% if i.status.name == 'Pending' %} status-pending
-                                {% elif i.status.name == 'Completed' %} status-completed
+                                {% if i.booking.status.name == 'Pending' %} status-pending
+                                {% elif i.booking.status.name == 'Completed' %} status-completed
                                 {% else %} status-cancelled {% endif %}">
-                                <i class="fas fa-sync-alt mr-1"></i> {{ i.status.name }}
+                                <i class="fas fa-sync-alt mr-1"></i> {{ i.booking.status }}
                             </button>
                         </a>
                     </td>
                     <td class="text-center">
-                        <a href="{% url 'admin_booking_detail' i.booking_id i.id i.profile.user.id %}" class="text-decoration-none">
+                        <a href="{% url 'admin_booking_detail' i.booking.booking_id  i.booking.id  i.booking.profile.user.id %}" class="text-decoration-none">
                             <button class="btn-action btn-view">
                                 <i class="fas fa-eye"></i> Detail
                             </button>
                         </a>
                     </td>
                     <td class="text-center">
-                        <a href="{% url 'delete_admin_booking' i.booking_id i.id %}" 
+                        <a href=" " 
                            onclick="return confirm('Are you sure you want to cancel this booking?')" class="text-decoration-none">
                             <button class="btn-action btn-cancel">
                                 <i class="fas fa-times-circle"></i> Cancel

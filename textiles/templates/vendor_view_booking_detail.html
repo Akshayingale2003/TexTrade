@@ -103,23 +103,21 @@
     <div class="section-card">
         <h5 class="mb-4 font-weight-bold text-secondary"><i class="fas fa-box-open mr-2"></i>Items in this Order</h5>
         {% for i in product %}
-            {% if i.id in book %}
                 <div class="product-item">
                     <div class="row align-items-center">
                         <div class="col-md-2 text-center">
-                            <img src="{{i.image.url}}" class="product-img" alt="{{i.name}}">
+                            <img src="{{i.product_image.url}}" class="product-img" alt="{{i.name}}">
                         </div>
                         <div class="col-md-7">
-                            <h5 class="font-weight-bold mb-1">{{i.name}}</h5>
-                            <p class="text-muted small mb-0">{{i.desc}}</p>
-                            <span class="price-badge">Rs. {{i.price}}</span>
+                            <h5 class="font-weight-bold mb-1">{{i.product_name}}</h5>
+                            <p class="text-muted small mb-0">{{i.product_desc}}</p>
+                            <span class="price-badge">Rs. {{i.product_price}} X {{i.quantity}}</span>
                         </div>
                         <div class="col-md-3 text-right">
                             <span class="status-badge">BOOKED SUCCESSFULLY</span>
                         </div>
                     </div>
                 </div>
-            {% endif %}
         {% endfor %}
 
         <div class="text-right mt-4">

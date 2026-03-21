@@ -1,14 +1,14 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,logout,login
 from .models import *
 from datetime import date
-from django.contrib import messages
 from django.conf import settings
 import razorpay
-from django.http import JsonResponse
-import uuid
+from django.http import JsonResponse ,HttpResponse
 from django.db import transaction
+import uuid
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -56,23 +56,8 @@ def About(request):
 def Contact(request):
     return render(request, 'contact.html')	
 	
+
 #user signup
-
-
-from django.shortcuts import render
-from django.contrib.auth.models import User
-from .models import Profile
-from django.db import IntegrityError
-import datetime
-
-from django.db.utils import IntegrityError
-from django.core.exceptions import ValidationError
-from datetime import datetime
-from django.db.utils import IntegrityError
-from django.core.exceptions import ValidationError
-from datetime import datetime
-
-from django.db import IntegrityError
 
 def Signup(request):
     error = ""
@@ -260,13 +245,6 @@ def All_product(request):
     return render(request,'all_product.html',d)
 
 
-def Admin_View_Booking(request):
-    if not request.user.is_authenticated:
-        return redirect('login_admin')
-    book = Booking.objects.all()
-    d = {'book': book}
-    return render(request, 'admin_viewBokking.html', d)
-
 
 def View_feedback(request):
     if not request.user.is_authenticated:
@@ -331,48 +309,12 @@ def View_Categary(request):
     return render(request,'view_category.html', d)
 
 
-
-def View_Booking(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    user = User.objects.get(id=request.user.id)
-    profile = Profile.objects.get(user=user)
-    cart = Cart.objects.filter(profile=profile)
-    book = Booking.objects.filter(profile=profile)
-    num1=0
-    for i in cart:
-        num1 += 1
-    d = {'book': book,'num1':num1}
-    return render(request, 'view_booking.html', d)
-
-
-def view_orders_vendor(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
-    cart = Cart.objects.all()
-    vendor = Vendor.objects.get(user=request.user)
-    book = Booking.objects.filter(products__vendor = vendor)
-    num1=0
-    for i in cart:
-        num1 += 1
-    d = {'book': book,'num1':num1}
-    return render(request,"view_orders_vendor.html",d)
-
 def view_orders(request):
     if not request.user.is_authenticated or not request.user.is_staff:
         return redirect('login_vender') 
 
     vendor = Vendor.objects.get(user=request.user)  
     products = Product.objects.filter(vendor=vendor)
-    # orders = Booking.objects.filter(product__in=products)  # Fetch all bookings related to the vendor's products.
-
-    # total_orders = orders.count()
-    
-    # d = {
-    #     'orders': orders,
-    #     'total_orders': total_orders,
-    # }
     return render(request, 'view_orders.html')
 
 
@@ -466,7 +408,12 @@ def Add_Cart(request,pid):
         user = User.objects.get(id=request.user.id)
         profile = Profile.objects.get(user=user)
         product = Product.objects.get(id=pid)
-        Cart.objects.create(profile=profile, product=product)
+        quantity = request.POST.get('quantity')
+        if quantity:
+             quant = quantity
+        else:
+            quant = 1
+        Cart.objects.create(profile=profile, product=product,quantity=quant)
         return redirect('cart')
 
 def view_cart(request):
@@ -475,47 +422,57 @@ def view_cart(request):
     user = User.objects.get(id=request.user.id)
     profile = Profile.objects.get(user=user)
     cart =  Cart.objects.filter(profile=profile).all()
+    for i in cart:
+        if i.quantity == 0:
+           i.delete()
+           return redirect('cart')
     total=0
     num1=0
     book_id=request.user.username
     message1="Here ! No Any Product"
     for i in cart:
-        total+=i.product.price
+        total+=i.product.price * i.quantity
         num1+=1
         book_id = book_id+"."+str(i.product.id)
     d = {'profile':profile,'cart':cart,'total':total,'num1':num1,'book':book_id,'message':message1}
     return render(request,'cart.html',d)
 
-
-def remove_cart(request,pid):
+def plus_cart(request,id):
     if not request.user.is_authenticated:
         return redirect('login')
-    cart = Cart.objects.get(id=pid)
+    cart = Cart.objects.get(id=id)
+    cart.quantity += 1
+    cart.save()
+    return redirect('cart')
+
+def minus_cart(request,id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    cart = Cart.objects.get(id=id)
+    cart.quantity -= 1
+    cart.save()
+    return redirect('cart')
+
+
+def remove_cart(request,id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    cart = Cart.objects.get(id=id)
     cart.delete()
     return redirect('cart')
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Booking, Cart, Profile, User, Status, Product, Status
-from datetime import date
-from django.http import HttpResponse
-from django.contrib.auth.models import User
-import uuid
+
 
 def Booking_order(request, pid):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    # Fetch user and profile safely
     data1 = get_object_or_404(User, id=request.user.id)
-    data = get_object_or_404(Profile, user=data1)  # ✅ Ensure Profile exists
+    data = get_object_or_404(Profile, user=data1)  
 
-    # Check if cart is empty
     cart = Cart.objects.filter(profile=data).all()
-    if not cart.exists():
-        return HttpResponse("Error: Your cart is empty!", status=400)  # 🛑 Prevent empty booking
 
-    # Calculate total price
-    total = sum(i.product.price for i in cart)
+    total = sum(i.product.price * i.quantity for i in cart)
     num1 = cart.count()
     date1 = date.today()
 
@@ -530,20 +487,30 @@ def Booking_order(request, pid):
 
         user = get_object_or_404(User, username=c)
         profile = get_object_or_404(Profile, user=user)
-        status = get_object_or_404(Status, name="pending")
+        status = "processing"
 
         # ✅ Generate a unique booking ID
         new_booking = Booking.objects.create(
             profile=profile,
             book_date=d,
             total=t,
-            quantity=num1,
             status=status
         )
 
-        # ✅ Add products to the booking
+
+
         for cart_item in cart:
-            new_booking.products.add(cart_item.product)
+            BookingItem.objects.create(
+                booking=new_booking,
+                product=cart_item.product,
+                product_name=cart_item.product.name,
+                product_price=cart_item.product.price,
+                quantity=cart_item.quantity,
+                product_image = cart_item.product.image,
+                product_desc = cart_item.product.desc
+
+            )
+
         cart.delete()
 
         return redirect('payment', new_booking.total)
@@ -560,6 +527,32 @@ def Booking_order(request, pid):
     return render(request, 'booking.html', context)
 
 
+def View_Booking(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    user = User.objects.get(id=request.user.id)
+    profile = Profile.objects.get(user=user)
+    cart = Cart.objects.filter(profile=profile)
+    book = Booking.objects.filter(profile=profile)
+    num1=0
+    for i in cart:
+        num1 += 1
+    d = {'book': book,'num1':num1}
+    return render(request, 'view_booking.html', d)
+
+
+def view_orders_vendor(request):
+    if not request.user.is_authenticated:
+        return redirect('login_vendor')
+    
+    cart = Cart.objects.all()
+    vendor = Vendor.objects.get(user=request.user)
+    book = BookingItem.objects.filter(product__vendor = vendor)
+    num1=0
+    for i in cart:
+        num1 += 1
+    d = {'book': book,'num1':num1}
+    return render(request,"view_orders_vendor.html",d)
 
 
 def payment(request,total):
@@ -575,12 +568,12 @@ def payment(request,total):
     return render(request,'payment2.html',d)
 
 
-def delete_admin_booking(request, pid,bid):
-    if not request.user.is_authenticated:
-        return redirect('login_admin')
-    book = Booking.objects.get(booking_id=pid,id=bid)
-    book.delete()
-    return redirect('admin_viewBooking')
+# def delete_admin_booking(request, pid,bid):
+#     if not request.user.is_authenticated:
+#         return redirect('login_admin')
+#     book = Booking.objects.get(booking_id=pid,id=bid)
+#     book.delete()
+#     return redirect('admin_viewBooking')
 
 def delete_booking(request, pid,bid):
     if not request.user.is_authenticated:
@@ -604,15 +597,6 @@ def delete_feedback(request, pid):
     return redirect('view_feedback')
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Booking, Product, Cart, Profile
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import Profile, Booking
-
-from django.shortcuts import render, get_object_or_404
 
 @login_required
 def booking_detail(request, pid, bid):
@@ -631,7 +615,12 @@ def booking_detail(request, pid, bid):
 
     return render(request, 'booking_detail.html', context)
 
-
+def Admin_View_Booking(request):
+    if not request.user.is_authenticated:
+        return redirect('login_admin')
+    book = BookingItem.objects.all()
+    d = {'book': book}
+    return render(request, 'admin_viewBokking.html', d)
 
 
 def admin_booking_detail(request,pid,bid,uid):
@@ -643,66 +632,62 @@ def admin_booking_detail(request,pid,bid,uid):
     product = Product.objects.all()
 
     booking = get_object_or_404(Booking, booking_id=pid, id=bid)
-    products = booking.products.all()
+    bookitem = BookingItem.objects.filter(booking=booking)
+
     li = []
 
-    for i in products:
-        li.append(i.id)
+    for i in bookitem:
+        li.append(i.product)
     
-    total_price = sum(product.price for product in products)
+    total_price = booking.total
 
-    d = {'profile':profile,'cart':cart,'total':total_price,'book':li,'product':product}
+    d = {'profile':profile,'cart':cart,'total':total_price,'book':li,'product':bookitem}
     return render(request,'admin_view_booking_detail.html',d)
 
 def vendor_view_booking_detail(request,pid,bid,uid):
     if not request.user.is_authenticated:
-        return redirect('login_admin')
+        return redirect('login_vendor')
     user = User.objects.get(id=uid)
     profile = Profile.objects.get(user=user)
     cart =  Cart.objects.filter(profile=profile).all()
-    product = Product.objects.all()
     num1=0
     booking = get_object_or_404(Booking, booking_id=pid, id=bid)
-    products = booking.products.all()
+    bookitem = BookingItem.objects.filter(booking=booking)
     li = []
 
-    for i in products:
-        li.append(i.id)
+    for i in bookitem:
+        li.append(i.product)
 
-    total_price = sum(product.price for product in products)
+    total_price = booking.total
 
-    d = {'profile':profile,'cart':cart,'total':total_price,'num1':num1,'book':li ,'product':product}
+    d = {'profile':profile,'cart':cart,'total':total_price,'num1':num1,'book':li ,'product':bookitem}
     return render(request,'vendor_view_booking_detail.html',d)
 
 def Edit_status(request,pid,bid):
     if not request.user.is_authenticated:
         return redirect('login_admin')
     book = Booking.objects.get(booking_id=pid,id=bid)
-    stat = Status.objects.all()
     if request.method == "POST":
         n = request.POST['book']
         s = request.POST['status']
         book.booking_id = n
-        sta = Status.objects.filter(name=s).first()
-        book.status = sta
+        book.status = s
         book.save()
         return redirect('admin_viewBooking')
-    d = {'book': book, 'stat': stat}
-    return render(request, 'status_vendor.html', d)
+    d = {'book': book}
+    return render(request, 'status.html', d)
 
 def Edit_status_vendor(request,pid,bid):
     book = Booking.objects.get(booking_id=pid,id=bid)
-    stat = Status.objects.all()
     if request.method == "POST":
         n = request.POST['book']
         s = request.POST['status']
         book.booking_id = n
-        sta = Status.objects.filter(name=s).first()
-        book.status = sta
+        book.status = s
         book.save()
         return redirect('view_orders_vendor')
-    d = {'book': book, 'stat': stat}
-    return render(request, 'status.html', d)
+    d = {'book': book }
+    return render(request, 'status_vendor.html', d)
 
 def Admin_View_product(request):
     if not request.user.is_authenticated:
@@ -726,9 +711,6 @@ def delete_product(request,pid):
     pro.delete()
     return redirect('admin_view_product')
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from .models import Profile, Cart  # Ensure correct model imports
 
 def profile(request):
     if not request.user.is_authenticated:
@@ -1022,10 +1004,6 @@ def edit_category(request,pid):
     return render(request, 'edit_category.html', d)
 
 # payment 
-import razorpay
-from django.conf import settings
-from django.shortcuts import render, redirect
-from .models import Booking
 
 def payment(request, total=None):
     if total is None:
@@ -1085,12 +1063,9 @@ def create_order(request):
     return render(request, "payment_form.html")
 
 # payment
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
-
-
 def process_booking(request):
     if request.method == "POST":
         profile = Profile.objects.get(user=request.user)
@@ -1126,17 +1101,18 @@ def payment_success(request):
         booking_id = request.POST.get("booking_id")  # ✅ Get booking_id from request
 
         try:
-            # ✅ Find the corresponding booking
+            # Find the corresponding booking
             booking = Booking.objects.get(booking_id=booking_id)
 
-            # ✅ Create Payment entry
+            # Create Payment entry
             payment = Payment.objects.create(
                 payment_id=razorpay_payment_id,
                 order_id=razorpay_order_id,
-                amount=booking.total
+                amount=booking.total,
+                status = 'paid'
             )
 
-            # ✅ Link the payment to the booking
+            # Link the payment to the booking
             booking.payment = payment
             booking.save()
 
@@ -1146,7 +1122,6 @@ def payment_success(request):
     return JsonResponse({"status": "error", "message": "Invalid request"})
 
 # confirmation
-from django.shortcuts import render
 
 def booking_confirmation(request):
     booking_id = request.GET.get("booking_id")
@@ -1165,8 +1140,6 @@ def booking_confirmation(request):
         "order_status": "Confirmed"
     })
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
 from .forms import ReviewForm
 
 @login_required
@@ -1176,8 +1149,6 @@ def booking_history(request):
 
 
 # reviews 
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Booking, Product, Review
 
 def add_review(request, booking_id, product_id):
     booking = Booking.objects.get(booking_id=booking_id)  # Get Booking
@@ -1202,9 +1173,6 @@ def add_review(request, booking_id, product_id):
 
 
 # product details
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Review
-from .forms import ReviewForm
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
