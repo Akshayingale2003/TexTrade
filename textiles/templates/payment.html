@@ -22,6 +22,7 @@
                 "handler": function (response) {
                     fetch("/payment-success/", {
                         method: "POST",
+                        credentials: "same-origin",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
                             "X-CSRFToken": "{{ csrf_token }}"
@@ -31,12 +32,16 @@
                             "razorpay_order_id": response.razorpay_order_id,
                             "booking_id": "{{ booking_id }}"
                         })
-                    }).then(response => response.json())
-                      .then(data => {
-                          alert("Payment Successful! Booking updated.");
-                          window.location.href = `/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=${response.razorpay_payment_id}`;
+                    }).then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+                      .then(function (result) {
+                          if (result.ok && result.data.status === "success") {
+                              alert("Payment Successful! Booking updated.");
+                              window.location.href = "/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=" + encodeURIComponent(response.razorpay_payment_id);
+                          } else {
+                              alert(result.data.message || "Payment could not be saved. Please contact support.");
+                          }
                       })
-                      .catch(error => console.error("Error:", error));
+                      .catch(function (error) { console.error("Error:", error); });
                 },
                 "theme": { "color": "#764ba2" }
             };
@@ -50,8 +55,9 @@
             // --- Cash on Delivery Logic ---
             document.getElementById("cod-btn").onclick = function(e) {
                 if(confirm("Confirm order with Cash on Delivery?")) {
-                    fetch("/payment-success/", { // Using your existing success URL logic
+                    fetch("/payment-success/", {
                         method: "POST",
+                        credentials: "same-origin",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
                             "X-CSRFToken": "{{ csrf_token }}"
@@ -60,10 +66,16 @@
                             "payment_mode": "COD",
                             "booking_id": "{{ booking_id }}"
                         })
-                    }).then(response => {
-                        alert("Order Placed Successfully via COD!");
-                        window.location.href = `/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=COD`;
-                    }).catch(error => console.error("Error:", error));
+                    }).then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+                      .then(function (result) {
+                          if (result.ok && result.data.status === "success") {
+                              alert("Order Placed Successfully via COD!");
+                              window.location.href = "/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=COD";
+                          } else {
+                              alert(result.data.message || "Could not place COD order. Please try again.");
+                          }
+                      })
+                      .catch(function (error) { console.error("Error:", error); });
                 }
             };
         });

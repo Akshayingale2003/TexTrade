@@ -89,7 +89,7 @@ class Cart(models.Model):
     
 class Payment(models.Model):
     id = models.AutoField(primary_key=True)
-    order_id = models.CharField(max_length=100, unique=True)
+    order_id = models.CharField(max_length=100, null = True)
     payment_id = models.CharField(max_length=100, blank=True, null=True)
     amount = models.FloatField()
     status = models.CharField(max_length=20, default="Pending")
@@ -105,7 +105,7 @@ class Booking(models.Model):
     booking_id = models.CharField(max_length=200, unique=True, blank=True) 
     book_date = models.CharField(max_length=30, null=True) 
     total = models.IntegerField(null=True) 
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True) 
+    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, null=True, blank=True ) 
 
     def save(self, *args, **kwargs):
         if not self.booking_id:

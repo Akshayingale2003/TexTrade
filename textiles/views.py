@@ -7,6 +7,7 @@ from django.conf import settings
 import razorpay
 from django.http import JsonResponse ,HttpResponse
 from django.db import transaction
+from django.views.decorators.http import require_POST
 import uuid
 from django.contrib.auth.decorators import login_required
 
@@ -309,13 +310,13 @@ def View_Categary(request):
     return render(request,'view_category.html', d)
 
 
-def view_orders(request):
-    if not request.user.is_authenticated or not request.user.is_staff:
-        return redirect('login_vender') 
+# def view_orders(request):
+#     if not request.user.is_authenticated or not request.user.is_staff:
+#         return redirect('login_vender') 
 
-    vendor = Vendor.objects.get(user=request.user)  
-    products = Product.objects.filter(vendor=vendor)
-    return render(request, 'view_orders.html')
+#     vendor = Vendor.objects.get(user=request.user)  
+#     products = Product.objects.filter(vendor=vendor)
+#     return render(request, 'view_orders.html')
 
 
 def Feedback(request, pid):
@@ -489,14 +490,12 @@ def Booking_order(request, pid):
         profile = get_object_or_404(Profile, user=user)
         status = "processing"
 
-        # ✅ Generate a unique booking ID
         new_booking = Booking.objects.create(
             profile=profile,
             book_date=d,
             total=t,
             status=status
         )
-
 
 
         for cart_item in cart:
@@ -513,7 +512,7 @@ def Booking_order(request, pid):
 
         cart.delete()
 
-        return redirect('payment', new_booking.total)
+        return redirect("payment", new_booking.total, new_booking.booking_id)
 
     context = {
         'data': data,
@@ -555,19 +554,6 @@ def view_orders_vendor(request):
     return render(request,"view_orders_vendor.html",d)
 
 
-def payment(request,total):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    error = False
-    user = User.objects.get(id=request.user.id)
-    profile= Profile.objects.get(user=user)
-    cart = Cart.objects.filter(profile = profile).all()
-    if request.method=="POST":
-        error=True
-    d ={'total':total,'error':error}
-    return render(request,'payment2.html',d)
-
-
 # def delete_admin_booking(request, pid,bid):
 #     if not request.user.is_authenticated:
 #         return redirect('login_admin')
@@ -597,24 +583,6 @@ def delete_feedback(request, pid):
     return redirect('view_feedback')
 
 
-
-@login_required
-def booking_detail(request, pid, bid):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    booking = get_object_or_404(Booking, booking_id=pid, id=bid)
-    products = booking.products.all()
-    order_status = booking.status.name if booking.status else "Pending"
-    total_price = sum(product.price for product in products)
-    context = {
-        'booking': booking,
-        'products': products,
-        'total_price': total_price,
-        'order_status': order_status,  
-    }
-
-    return render(request, 'booking_detail.html', context)
-
 def Admin_View_Booking(request):
     if not request.user.is_authenticated:
         return redirect('login_admin')
@@ -623,13 +591,34 @@ def Admin_View_Booking(request):
     return render(request, 'admin_viewBokking.html', d)
 
 
+@login_required
+def booking_detail(request, pid, bid):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    booking = get_object_or_404(Booking, booking_id=pid, id=bid)
+    bookitem = BookingItem.objects.filter(booking=booking)
+
+    li = []
+    for i in bookitem:
+        li.append(i.product)
+
+    total_price = booking.total
+
+    context = {
+        'book': li,
+        'booking' : booking ,
+        'product':bookitem,
+        'total':total_price
+    }
+    return render(request, 'booking_detail.html', context)
+
+
 def admin_booking_detail(request,pid,bid,uid):
     if not request.user.is_authenticated:
         return redirect('login_admin')
     user = User.objects.get(id=uid)
     profile = Profile.objects.get(user=user)
     cart =  Cart.objects.filter(profile=profile).all()
-    product = Product.objects.all()
 
     booking = get_object_or_404(Booking, booking_id=pid, id=bid)
     bookitem = BookingItem.objects.filter(booking=booking)
@@ -1003,24 +992,53 @@ def edit_category(request,pid):
     d = {'error':error,'category':category}
     return render(request, 'edit_category.html', d)
 
-# payment 
+# payment
 
-def payment(request, total=None):
-    if total is None:
-        return render(request, "error.html", {"error": "Invalid total amount."})
+
+@login_required
+def payment(request, total, booking_id):
+    """
+    Checkout for a specific booking. URL must include the booking_id created on the
+    booking step so we never guess the row from latest_booking or sortable book_date.
+    """
+    profile = request.user.profile
+    booking = get_object_or_404(
+        Booking,
+        booking_id=booking_id,
+        profile=profile,
+    )
+
+    if booking.payment_id:
+        return render(
+            request,
+            "error.html",
+            {"error": "This booking already has a payment recorded."},
+        )
+
+    if booking.total is None:
+        return render(request, "error.html", {"error": "Invalid booking total."})
+
+    try:
+        if int(booking.total) != int(total):
+            return render(
+                request,
+                "error.html",
+                {"error": "Amount does not match this booking."},
+            )
+    except (TypeError, ValueError):
+        if str(booking.total).strip() != str(total).strip():
+            return render(
+                request,
+                "error.html",
+                {"error": "Amount does not match this booking."},
+            )
 
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-    profile = request.user.profile
-    latest_booking = Booking.objects.filter(profile=profile).order_by('-book_date').first()
-    
-    if not latest_booking:
-        return render(request, "error.html", {"error": "No booking found."})
-
     data = {
-        "amount": int(total) * 100, 
+        "amount": int(total) * 100,
         "currency": "INR",
-        "payment_capture": "1"
+        "payment_capture": "1",
     }
 
     try:
@@ -1028,37 +1046,60 @@ def payment(request, total=None):
     except razorpay.errors.BadRequestError:
         return render(request, "error.html", {"error": "Authentication failed. Check API keys."})
 
-    return render(request, "payment.html", {
+    context = {
         "amount": total,
         "order_id": order["id"],
         "razorpay_key": settings.RAZORPAY_KEY_ID,
-         "booking_id": latest_booking.booking_id  
-    })
+        "booking_id": booking.booking_id,
+    }
+
+    return render(request, "payment.html", context)
 
 
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 def create_order(request):
     if request.method == "POST":
-        amount = int(request.POST.get("amount")) * 100  
-        order_currency = "INR"
-        
-        # Create a Razorpay Order
-        order = razorpay_client.order.create({
-            "amount": amount,
-            "currency": order_currency,
-            "payment_capture": "1"
-        })
+        if not request.user.is_authenticated:
+            return redirect("login")
+        booking_id = (request.POST.get("booking_id") or "").strip()
+        if not booking_id:
+            return render(
+                request,
+                "error.html",
+                {"error": "booking_id is required for payment."},
+            )
+        get_object_or_404(
+            Booking,
+            booking_id=booking_id,
+            profile=request.user.profile,
+        )
 
-        # Save order to database
-        payment = Payment(order_id=order["id"], amount=amount/100, status="Created")
+        amount_paise = int(request.POST.get("amount")) * 100
+        order_currency = "INR"
+        amount_rupees = amount_paise // 100
+
+        order = razorpay_client.order.create(
+            {
+                "amount": amount_paise,
+                "currency": order_currency,
+                "payment_capture": "1",
+            }
+        )
+
+        payment = Payment(order_id=order["id"], amount=amount_rupees, status="Created")
         payment.save()
 
-        return render(request, "payment.html", {
-            "order_id": order["id"],
-            "razorpay_key": settings.RAZORPAY_KEY_ID,
-            "amount": amount
-        })
+        return render(
+            request,
+            "payment.html",
+            {
+                "order_id": order["id"],
+                "razorpay_key": settings.RAZORPAY_KEY_ID,
+                "amount": amount_rupees,
+                "booking_id": booking_id,
+            },
+        )
 
     return render(request, "payment_form.html")
 
@@ -1071,55 +1112,95 @@ def process_booking(request):
         profile = Profile.objects.get(user=request.user)
         total = request.POST.get("total")
 
-        # ✅ Ensure "Pending" status exists
-        pending_status, created = Status.objects.get_or_create(name="Pending")
+        pending_status, created = "Pending"
 
-        print(f"Using status: {pending_status.name}, Created new status: {created}")  # ✅ Debugging output
-
-        with transaction.atomic():  # ✅ Prevents race conditions
+        with transaction.atomic():  
             booking, created = Booking.objects.get_or_create(
                 profile=profile,
                 total=total,
-                payment=None,  # ✅ Ensures we only check unpaid bookings
-                defaults={"status": pending_status}  # ✅ Set status when creating
+                payment=None, 
+                defaults={"status": pending_status}  
             )
 
-            # ✅ If the booking already exists, ensure status is "Pending"
             if not created and booking.status != pending_status:
                 booking.status = pending_status
                 booking.save()
 
-            print(f"Booking created: {created}, Status assigned: {booking.status.name}")  # ✅ Debugging output
-
         return redirect("success_page")
 
 
+@login_required
+@require_POST
 def payment_success(request):
-    if request.method == "POST":
-        razorpay_payment_id = request.POST.get("razorpay_payment_id")
-        razorpay_order_id = request.POST.get("razorpay_order_id")
-        booking_id = request.POST.get("booking_id")  # ✅ Get booking_id from request
+    booking_id = (request.POST.get("booking_id") or "").strip()
+    payment_mode = (request.POST.get("payment_mode") or "").strip()
 
-        try:
-            # Find the corresponding booking
-            booking = Booking.objects.get(booking_id=booking_id)
+    if not booking_id:
+        return JsonResponse(
+            {"status": "error", "message": "Missing booking_id"},
+            status=400,
+        )
 
-            # Create Payment entry
-            payment = Payment.objects.create(
-                payment_id=razorpay_payment_id,
-                order_id=razorpay_order_id,
-                amount=booking.total,
-                status = 'paid'
+    rz_payment_id = ""
+    rz_order_id = ""
+    if payment_mode != "COD":
+        rz_payment_id = (request.POST.get("razorpay_payment_id") or "").strip()
+        rz_order_id = (request.POST.get("razorpay_order_id") or "").strip()
+        if not rz_payment_id or not rz_order_id:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "Missing Razorpay payment details",
+                },
+                status=400,
             )
 
-            # Link the payment to the booking
-            booking.payment = payment
-            booking.save()
+    try:
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().get(
+                booking_id=booking_id,
+                profile=request.user.profile,
+            )
 
-            return JsonResponse({"status": "success"})
-        except Booking.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Booking not found"})
-    return JsonResponse({"status": "error", "message": "Invalid request"})
+            if booking.payment_id:
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": "This booking already has a payment recorded.",
+                    },
+                    status=409,
+                )
+
+            if payment_mode == "COD":
+                payment = Payment.objects.create(
+                    payment_id="COD",
+                    order_id=f"COD-{uuid.uuid4().hex[:10]}",
+                    amount=float(booking.total or 0),
+                    status="Pending",
+                )
+            else:
+                payment = Payment.objects.create(
+                    payment_id=rz_payment_id,
+                    order_id=rz_order_id,
+                    amount=float(booking.total or 0),
+                    status="Paid",
+                )
+
+            booking.payment = payment
+            booking.save(update_fields=["payment"])
+
+    except Booking.DoesNotExist:
+        return JsonResponse(
+            {"status": "error", "message": "Booking not found"},
+            status=404,
+        )
+    except Exception:
+        return JsonResponse(
+            {"status": "error", "message": "Could not record payment"},
+            status=500,
+        )
+
+    return JsonResponse({"status": "success"})
 
 # confirmation
 
@@ -1128,17 +1209,16 @@ def booking_confirmation(request):
     total_amount = request.GET.get("total_amount")
     payment_id = request.GET.get("payment_id")
 
-    try:
-        booking = Booking.objects.get(booking_id=booking_id)
-    except Booking.DoesNotExist:
-        return render(request, "error.html", {"error": "Booking not found."})
-
-    return render(request, "booking_confirmation.html", {
+    booking = Booking.objects.get(booking_id=booking_id)
+   
+    context = {
         "booking_id": booking_id,
         "total_amount": total_amount,
         "payment_id": payment_id,
         "order_status": "Confirmed"
-    })
+    }
+
+    return render(request, "booking_confirmation.html", context)
 
 from .forms import ReviewForm
 
