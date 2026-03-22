@@ -58,17 +58,11 @@ urlpatterns = [
     path('delete_vendor/<int:id>',delete_user,name='delete_vendor'),
     path('booking/<str:pid>/', Booking_order, name="booking_order"),
 
-    path('process_booking/', process_booking, name="process_booking"), 
-    path('review/<int:product_id>/', add_review, name='add_review'),
-    path(
-        "payment/<int:total>/<str:booking_id>/",
-        views.payment,
-        name="payment",
-    ),
+    path('process_booking/', process_booking, name="process_booking"),
+    path("payment/<int:total>/<str:booking_id>/", payment, name="payment"),
     path('pay/', views.create_order, name='create_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path("booking-confirmation/", booking_confirmation, name="booking_confirmation"),
-    path("product/<int:product_id>/review/", add_review, name="add_review"),
     path('delete_booking/<str:pid>/<bid>', delete_booking, name='delete_booking'),
     # path('delete_admin_booking/<str:pid>/<bid>', delete_admin_booking, name='delete_admin_booking'),
     path('booking_detail/<str:pid>/<bid>', booking_detail, name='booking_detail'),
@@ -101,7 +95,7 @@ urlpatterns = [
     # path('view_orders',view_orders,name="view_orders"),     
     path('view_orders_vendor',view_orders_vendor,name="view_orders_vendor"),     
 
-    path('product/<str:booking_id>/<int:product_id>/review/', views.add_review, name='add_review'),
+    path('order/<str:booking_id>/review/<int:product_id>/', views.add_review, name='add_review'),
     path('admin_edit_user/<int:id>',admin_edit_user , name='admin_edit_user'),
     path('admin_edit_vendor/<int:id>',admin_edit_vendor , name='admin_edit_vendor'),
     path('plus_cart/<int:id>',plus_cart , name='plus_cart'),

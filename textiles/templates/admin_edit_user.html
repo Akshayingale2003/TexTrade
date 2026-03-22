@@ -2,105 +2,125 @@
 {% block body %}
 {% load static %}
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
 <style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-purple: #6c5ce7;
+    }
+
     body {
-        background-color: #f4f7f6;
+        background-color: #f8f9fa;
         font-family: 'Poppins', sans-serif;
     }
 
     .profile-wrapper {
-        margin-top: 60px;
-        margin-bottom: 60px;
+        margin-top: 50px;
+        margin-bottom: 50px;
     }
 
     .profile-card {
-        background: #ffffff;
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        background: var(--glass-bg);
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
         padding: 40px;
+        backdrop-filter: blur(10px);
     }
 
     .profile-header {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
     }
 
     .profile-title {
-        font-weight: 700;
-        color: #2d3436;
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
 
     .form-section-title {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         font-weight: 700;
-        color: #E6120E;
-        margin-bottom: 20px;
+        color: var(--accent-purple);
+        margin-bottom: 25px;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
+        letter-spacing: 1.5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #eee;
+        margin-left: 15px;
     }
 
     .form-group label {
         font-weight: 600;
-        color: #636e72;
+        color: #2d3436;
         font-size: 0.85rem;
         margin-bottom: 8px;
     }
 
-    /* Styles for fields */
-    .form-control-readonly {
-        background-color: #f8f9fa !important;
-        border: 1px solid #e9ecef;
-        color: #adb5bd;
-        cursor: not-allowed;
-    }
-
     .form-control-edit {
-        border-radius: 10px;
-        padding: 12px 15px;
-        border: 2px solid #f1f1f1;
-        transition: 0.3s;
+        border-radius: 12px;
+        padding: 12px 18px;
+        border: 1px solid #dfe6e9;
+        background: #fdfdff;
+        transition: 0.3s ease;
         font-weight: 500;
+        color: #2d3436;
     }
 
     .form-control-edit:focus {
-        border-color: #E6120E;
-        box-shadow: 0 0 0 0.2rem rgba(230, 18, 14, 0.1);
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+        background: #fff;
+    }
+
+    .profile-img-container {
+        position: relative;
+        display: inline-block;
     }
 
     .profile-img-preview {
-        width: 140px;
-        height: 140px;
+        width: 150px;
+        height: 150px;
         object-fit: cover;
-        border-radius: 50%;
-        border: 4px solid #fff;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .btn-update-profile {
-        background: linear-gradient(135deg, #E6120E, #c40f0c);
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 1rem;
-        width: 100%;
-        margin-top: 20px;
+        border-radius: 25px;
+        border: 5px solid white;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         transition: 0.3s;
     }
 
+    .btn-update-profile {
+        background: var(--main-gradient);
+        color: white !important;
+        border: none;
+        padding: 16px;
+        border-radius: 15px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        width: 100%;
+        margin-top: 30px;
+        transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+
     .btn-update-profile:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(230, 18, 14, 0.2);
-        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(108, 92, 231, 0.4);
+    }
+
+    .icon-addon {
+        color: var(--accent-purple);
+        margin-right: 5px;
     }
 </style>
 
@@ -109,14 +129,17 @@
         <div class="col-lg-10">
             <div class="profile-card">
                 <div class="profile-header">
-                    <h3 class="profile-title">Update Your Profile</h3>
-                    <p class="text-muted small">Account settings and personal information</p>
+                    <h2 class="profile-title">User Profile</h2>
+                    <p class="text-muted">Manage Users information and account details</p>
                 </div>
 
                 <form method="post" action="" enctype="multipart/form-data">
                     {% csrf_token %}
 
-                    <div class="form-section-title">Identity & Account</div>
+                    <div class="form-section-title">
+                        <i class="fas fa-user-circle mr-2"></i> Identity & Account
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-4 form-group">
                             <label>First Name</label>
@@ -128,45 +151,51 @@
                         </div>
                         <div class="col-md-4 form-group">
                             <label>Username</label>
-                            <input type="text" class="form-control form-control-edit form-control" name="uname" value="{{ pro.user.username }}" >
+                            <input type="text" class="form-control form-control-edit" name="uname" value="{{ pro.user.username }}" required>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 form-group">
-                            <label>Email Address</label>
-                            <input type="email" class="form-control form-control-edit form-control" name="email" value="{{ pro.user.email }}" >
-                        </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" class="form-control form-control-edit" name="email" value="{{ pro.user.email }}" required>
                     </div>
 
-                    <div class="form-section-title mt-4">Personal Details</div>
+                    <div class="form-section-title mt-4">
+                        <i class="fas fa-address-card mr-2"></i> Contact Information
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label><i class="fas fa-city mr-1"></i> City</label>
+                            <label><i class="fas fa-city icon-addon"></i> City</label>
                             <input type="text" class="form-control form-control-edit" name="city" value="{{ pro.city }}" required>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label><i class="fas fa-phone mr-1"></i> Contact Number</label>
+                            <label><i class="fas fa-phone icon-addon"></i> Mobile</label>
                             <input type="text" class="form-control form-control-edit" name="contact" value="{{ pro.contact }}" required>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label><i class="fas fa-calendar-alt mr-1"></i> Date of Birth</label>
+                            <label><i class="fas fa-calendar-alt icon-addon"></i> Birthday</label>
                             <input type="date" class="form-control form-control-edit" name="date" value="{{ pro.dob|date:'Y-m-d' }}" required>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label><i class="fas fa-map-marker-alt mr-1"></i> Address</label>
+                        <label><i class="fas fa-map-marker-alt icon-addon"></i> Full Address</label>
                         <input type="text" class="form-control form-control-edit" name="add" value="{{ pro.address }}" required>
                     </div>
 
-                    <div class="row align-items-center mt-4">
-                        <div class="col-md-8 form-group">
-                            <label><i class="fas fa-camera mr-1"></i> Profile Picture</label>
-                            <input type="file" class="form-control form-control-edit" name="img" onchange="previewImage(event)">
-                            <small class="text-muted d-block mt-2">Recommended: Square image, max 2MB</small>
+                    <div class="row align-items-center mt-5">
+                        <div class="col-md-8">
+                            <div class="form-section-title">
+                                <i class="fas fa-camera mr-2"></i> Profile Image
+                            </div>
+                            <div class="custom-file mb-3">
+                                <input type="file" name="img" class="form-control-edit w-100" style="padding: 8px;" onchange="previewImage(event)">
+                            </div>
+                            <p class="small text-muted">Upload a new photo to update your profile avatar.</p>
                         </div>
                         <div class="col-md-4 text-center">
-                            <div class="current-img-box">
+                            <div class="profile-img-container">
                                 {% if pro.image %}
                                     <img src="{{ pro.image.url }}" id="imagePreview" class="profile-img-preview">
                                 {% else %}
@@ -177,7 +206,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-update-profile">
-                        <i class="fas fa-save mr-2"></i> Save Changes
+                        Update Profile Details
                     </button>
                 </form>
             </div>
@@ -186,14 +215,17 @@
 </div>
 
 <script>
-
     function previewImage(event) {
         var reader = new FileReader();
         reader.onload = function(){
             var output = document.getElementById('imagePreview');
             output.src = reader.result;
+            output.style.transform = "scale(1.05)";
+            setTimeout(() => { output.style.transform = "scale(1)"; }, 200);
         };
-        reader.readAsDataURL(event.target.files[0]);
+        if(event.target.files[0]) {
+            reader.readAsDataURL(event.target.files[0]);
+        }
     }
 </script>
 

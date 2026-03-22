@@ -1,17 +1,51 @@
-from django.shortcuts import render,redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,logout,login
+from django.contrib import messages
 from .models import *
 from datetime import date
 from django.conf import settings
 import razorpay
-from django.http import JsonResponse ,HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
+from django.db.models import Sum, Q, F
 from django.db import transaction
 from django.views.decorators.http import require_POST
 import uuid
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+
+
+def _pending_reviews_for_booking_items(booking, items, reviewed_product_ids):
+    """
+    Products in this booking the user can still review (delivered + not yet reviewed).
+    Returns (list of {name, url}, has_any_reviewable_product).
+    """
+    pending = []
+    has_reviewable = False
+    if (booking.status or "").strip().lower() != "delivered":
+        return pending, has_reviewable
+    for item in items:
+        if not item.product:
+            continue
+        has_reviewable = True
+        if item.product.id not in reviewed_product_ids:
+            name = (item.product_name or item.product.name or "Product")[:100]
+            pending.append(
+                {
+                    "name": name,
+                    "url": reverse(
+                        "add_review",
+                        kwargs={
+                            "booking_id": booking.booking_id,
+                            "product_id": item.product.id,
+                        },
+                    ),
+                }
+            )
+    return pending, has_reviewable
+
 
 def Home(request):
     cat = ""
@@ -189,8 +223,12 @@ def Logout(request):
 
 # vendor homepage logic
 def vendor_home(request):
-    
-    return render(request,"vendor_home.html")
+    if not request.user.is_authenticated:
+        return redirect('login_vendor')
+    vendor = Vendor.objects.get(user=request.user)
+    num1 = Product.objects.filter(vendor=vendor).count()
+    num2 = Booking.objects.filter(items__product__vendor=vendor).distinct().count()
+    return render(request, "vendor_home.html", {'num1': num1, 'num2': num2})
 
 
 def View_user(request):
@@ -532,26 +570,47 @@ def View_Booking(request):
     user = User.objects.get(id=request.user.id)
     profile = Profile.objects.get(user=user)
     cart = Cart.objects.filter(profile=profile)
-    book = Booking.objects.filter(profile=profile)
-    num1=0
-    for i in cart:
-        num1 += 1
-    d = {'book': book,'num1':num1}
-    return render(request, 'view_booking.html', d)
+    book = list(
+        Booking.objects.filter(profile=profile)
+        .prefetch_related("items__product")
+        .order_by("-id")
+    )
+    reviewed_product_ids = set(
+        Review.objects.filter(user=user).values_list("product_id", flat=True)
+    )
+    for b in book:
+        pending, has_rev = _pending_reviews_for_booking_items(
+            b, b.items.all(), reviewed_product_ids
+        )
+        b.pending_review_items = pending
+        b.has_reviewable_products = has_rev
+
+    num1 = cart.count()
+    d = {"book": book, "num1": num1}
+    return render(request, "view_booking.html", d)
 
 
 def view_orders_vendor(request):
     if not request.user.is_authenticated:
         return redirect('login_vendor')
-    
-    cart = Cart.objects.all()
+
     vendor = Vendor.objects.get(user=request.user)
-    book = BookingItem.objects.filter(product__vendor = vendor)
-    num1=0
-    for i in cart:
-        num1 += 1
-    d = {'book': book,'num1':num1}
-    return render(request,"view_orders_vendor.html",d)
+    item_vendor_q = Q(items__product__vendor=vendor)
+    book = (
+        Booking.objects.filter(item_vendor_q)
+        .annotate(
+            vendor_qty=Sum('items__quantity', filter=Q(items__product__vendor=vendor)),
+            vendor_subtotal=Sum(
+                F('items__product_price') * F('items__quantity'),
+                filter=Q(items__product__vendor=vendor),
+            ),
+        )
+        .order_by('-id')
+    )
+
+    cart = Cart.objects.filter(profile__user=request.user).count()
+    d = {'book': book, 'num1': cart}
+    return render(request, "view_orders_vendor.html", d)
 
 
 # def delete_admin_booking(request, pid,bid):
@@ -586,7 +645,7 @@ def delete_feedback(request, pid):
 def Admin_View_Booking(request):
     if not request.user.is_authenticated:
         return redirect('login_admin')
-    book = BookingItem.objects.all()
+    book = Booking.objects.all().order_by('-id')
     d = {'book': book}
     return render(request, 'admin_viewBokking.html', d)
 
@@ -595,7 +654,9 @@ def Admin_View_Booking(request):
 def booking_detail(request, pid, bid):
     if not request.user.is_authenticated:
         return redirect('login')
-    booking = get_object_or_404(Booking, booking_id=pid, id=bid)
+    booking = get_object_or_404(
+        Booking, booking_id=pid, id=bid, profile__user=request.user
+    )
     bookitem = BookingItem.objects.filter(booking=booking)
 
     li = []
@@ -603,14 +664,22 @@ def booking_detail(request, pid, bid):
         li.append(i.product)
 
     total_price = booking.total
+    reviewed_product_ids = set(
+        Review.objects.filter(user=request.user).values_list("product_id", flat=True)
+    )
+    pending_review_items, has_reviewable_products = _pending_reviews_for_booking_items(
+        booking, bookitem, reviewed_product_ids
+    )
 
     context = {
-        'book': li,
-        'booking' : booking ,
-        'product':bookitem,
-        'total':total_price
+        "book": li,
+        "booking": booking,
+        "product": bookitem,
+        "total": total_price,
+        "pending_review_items": pending_review_items,
+        "has_reviewable_products": has_reviewable_products,
     }
-    return render(request, 'booking_detail.html', context)
+    return render(request, "booking_detail.html", context)
 
 
 def admin_booking_detail(request,pid,bid,uid):
@@ -636,21 +705,30 @@ def admin_booking_detail(request,pid,bid,uid):
 def vendor_view_booking_detail(request,pid,bid,uid):
     if not request.user.is_authenticated:
         return redirect('login_vendor')
+    vendor = Vendor.objects.get(user=request.user)
     user = User.objects.get(id=uid)
     profile = Profile.objects.get(user=user)
-    cart =  Cart.objects.filter(profile=profile).all()
-    num1=0
+    cart = Cart.objects.filter(profile=profile).all()
+    num1 = 0
     booking = get_object_or_404(Booking, booking_id=pid, id=bid)
-    bookitem = BookingItem.objects.filter(booking=booking)
-    li = []
+    bookitem = BookingItem.objects.filter(booking=booking, product__vendor=vendor)
+    if not bookitem.exists():
+        raise Http404("No products from your store in this order.")
+    li = [i.product for i in bookitem if i.product]
+    agg = bookitem.aggregate(
+        subtotal=Sum(F('product_price') * F('quantity'))
+    )
+    total_price = agg['subtotal'] or 0
 
-    for i in bookitem:
-        li.append(i.product)
-
-    total_price = booking.total
-
-    d = {'profile':profile,'cart':cart,'total':total_price,'num1':num1,'book':li ,'product':bookitem}
-    return render(request,'vendor_view_booking_detail.html',d)
+    d = {
+        'profile': profile,
+        'cart': cart,
+        'total': total_price,
+        'num1': num1,
+        'book': li,
+        'product': bookitem,
+    }
+    return render(request, 'vendor_view_booking_detail.html', d)
 
 def Edit_status(request,pid,bid):
     if not request.user.is_authenticated:
@@ -878,7 +956,7 @@ def admin_edit_user(request,id):
         city = request.POST['city']
         address = request.POST['add']
         contact = request.POST['contact']
-        dob = request.POST['date']
+        dob = request.POST.get('date')
         img = request.FILES.get('img')
 
         pro.user.first_name = fname
@@ -888,7 +966,8 @@ def admin_edit_user(request,id):
         pro.city = city
         pro.address = address
         pro.contact = contact
-        pro.dob = dob
+        if dob :
+            pro.dob = dob
         if img :
             pro.image = img
         pro.user.save()
@@ -1228,26 +1307,56 @@ def booking_history(request):
     return render(request, 'booking_history.html', {'bookings': bookings})
 
 
-# reviews 
+# reviews
 
+
+def _booking_status_is_delivered(booking):
+    st = (booking.status or "").strip().lower()
+    return st == "delivered"
+
+
+@login_required(login_url="login")
 def add_review(request, booking_id, product_id):
-    booking = Booking.objects.get(booking_id=booking_id)  # Get Booking
-    product = Product.objects.get(id=product_id)  # Get Product
+    profile = get_object_or_404(Profile, user=request.user)
+    booking = get_object_or_404(Booking, booking_id=booking_id, profile=profile)
+
+    if not _booking_status_is_delivered(booking):
+        messages.warning(
+            request,
+            "You can review products only after the order is marked delivered.",
+        )
+        return redirect("view_booking")
+
+    if not BookingItem.objects.filter(booking=booking, product_id=product_id).exists():
+        raise Http404("This product is not part of this order.")
+
+    product = get_object_or_404(Product, id=product_id)
+
+    if Review.objects.filter(user=request.user, product=product).exists():
+        messages.info(request, "You have already reviewed this product.")
+        return redirect("view_booking")
 
     if request.method == "POST":
-        comment = request.POST.get("comment")  # Match "comment" field
-        rating = request.POST.get("rating")
+        comment = (request.POST.get("comment") or "").strip()
+        rating_raw = request.POST.get("rating")
+        try:
+            rating = int(rating_raw)
+        except (TypeError, ValueError):
+            rating = 0
+        if not comment or rating < 1 or rating > 5:
+            messages.error(request, "Please choose a rating and write a short review.")
+            return redirect(
+                "add_review", booking_id=booking.booking_id, product_id=product.id
+            )
 
-        # ✅ Ensure Review object is created with correct field names
-        review = Review.objects.create(
+        Review.objects.create(
             product=product,
-            user=request.user,  # Assuming user is logged in
-            comment=comment,  # Use "comment" instead of "review_text"
-            rating=int(rating)  # Convert rating to integer
+            user=request.user,
+            comment=comment,
+            rating=rating,
         )
-        review.save()
-
-        return redirect("view_booking")  # Redirect after review submission
+        messages.success(request, "Thanks — your review was submitted.")
+        return redirect("view_booking")
 
     return render(request, "add_review.html", {"booking": booking, "product": product})
 

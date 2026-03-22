@@ -7,9 +7,7 @@
         --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
-    body {
-        background-color: #f8f9fa;
-    }
+    body { background-color: #f8f9fa; }
 
     .booking-container {
         background: var(--glass-bg);
@@ -22,10 +20,7 @@
         backdrop-filter: blur(10px);
     }
 
-    .page-header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
+    .page-header { text-align: center; margin-bottom: 30px; }
 
     .page-header h2 {
         font-weight: 800;
@@ -37,90 +32,48 @@
         letter-spacing: 1px;
     }
 
-    /* Table Styling */
-    .custom-table {
-        border-collapse: separate;
-        border-spacing: 0 12px;
-        width: 100%;
-    }
+    .custom-table { border-collapse: separate; border-spacing: 0 12px; width: 100%; }
 
     .custom-table thead th {
-        background: transparent;
-        border: none;
-        color: #636e72;
-        text-transform: uppercase;
-        font-size: 12px;
-        font-weight: 800;
-        padding: 15px;
-        text-align: center;
+        background: transparent; border: none; color: #636e72;
+        text-transform: uppercase; font-size: 12px; font-weight: 800;
+        padding: 15px; text-align: center;
     }
 
-    .custom-table tbody tr {
-        background: white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-        transition: 0.3s;
-    }
+    .custom-table tbody tr { background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: 0.3s; }
+    .custom-table tbody tr:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(108, 92, 231, 0.1); }
 
-    .custom-table tbody tr:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.1);
-    }
-
-    .custom-table td {
-        vertical-align: middle;
-        padding: 15px;
-        border: none;
-        color: #2d3436;
-        font-weight: 500;
-        text-align: center;
-    }
-
+    .custom-table td { vertical-align: middle; padding: 15px; border: none; color: #2d3436; font-weight: 500; text-align: center; }
     .custom-table td:first-child { border-radius: 15px 0 0 15px; }
     .custom-table td:last-child { border-radius: 0 15px 15px 0; }
 
-    /* Status Badge logic */
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 50px;
-        font-size: 11px;
-        font-weight: 800;
-        background: #f1f2f6;
-        color: #6c5ce7;
-        text-transform: uppercase;
-    }
+    .status-badge { padding: 6px 14px; border-radius: 50px; font-size: 11px; font-weight: 800; background: #f1f2f6; color: #6c5ce7; text-transform: uppercase; }
 
-    /* Button Styling */
-    .btn-detail {
-        background: #6c5ce7;
-        color: white !important;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 6px 15px;
-        border: none;
-    }
-
-    .btn-cancel {
-        background: #ff7675;
-        color: white !important;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 6px 15px;
-        border: none;
-    }
+    .btn-detail { background: #6c5ce7; color: white !important; border-radius: 8px; font-size: 12px; font-weight: 700; padding: 6px 15px; border: none; }
+    .btn-cancel { background: #ff7675; color: white !important; border-radius: 8px; font-size: 12px; font-weight: 700; padding: 6px 15px; border: none; }
 
     .btn-review {
-        background: var(--main-gradient);
-        color: white !important;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 5px 12px;
-        border: none;
-        margin-bottom: 2px;
-        display: inline-block;
+        background: var(--main-gradient); color: white !important;
+        border-radius: 8px; font-size: 11px; font-weight: 700;
+        padding: 5px 12px; border: none; display: inline-block; cursor: pointer;
     }
+
+    .review-modal .modal-content { border-radius: 18px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.12); }
+    .review-modal .modal-header { border-bottom: 1px solid #f1f2f6; align-items: center; }
+    .review-modal .modal-title { font-weight: 800; font-size: 1.1rem; color: #2d3436; }
+    .review-modal .list-group-item-action {
+        border-radius: 12px !important; margin-bottom: 8px;
+        border: 1px solid #eef2f6 !important; font-weight: 600; color: #4a5568;
+    }
+    .review-modal .list-group-item-action:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+        color: #5f27cd;
+    }
+
+    /* Above fixed navbar (1030), chatbot (1000), and glass parents with backdrop-filter */
+    .modal.review-modal { z-index: 10050 !important; }
+    body.modal-open .modal.review-modal.show { z-index: 10050 !important; }
+    body.modal-open .modal-backdrop { z-index: 10040 !important; }
 </style>
 
 <div class="container">
@@ -131,7 +84,7 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table custom-table" id="myTable">
+            <table class="table custom-table">
                 <thead>
                     <tr>
                         <th>Sr. No</th>
@@ -141,7 +94,7 @@
                         <th>Status</th>
                         <th>View</th>
                         <th>Action</th>
-                        <th>Review Items</th>
+                        <th>Review</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -159,16 +112,26 @@
                             </a>
                         </td>
                         <td>
-                            <a href="{% url 'delete_booking' i.booking_id i.id %}" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                            <a href="{% url 'delete_booking' i.booking_id i.id %}" onclick="return confirm('Are you sure?')">
                                 <button class="btn-cancel">Cancel</button>
                             </a>
                         </td>
                         <td>
-                            {% for product in i.products.all %}
-                                <a href="{% url 'add_review' i.booking_id product.id %}">
-                                    <button class="btn-review">Rate Product</button>
-                                </a>
-                            {% endfor %}
+                            {% if i.status|default:''|lower == 'delivered' %}
+                                {% if i.pending_review_items|length > 1 %}
+                                    <button type="button" class="btn-review" data-toggle="modal" data-target="#reviewPickModal-{{ i.id }}">
+                                        Review
+                                    </button>
+                                {% elif i.pending_review_items|length == 1 %}
+                                    <a href="{{ i.pending_review_items.0.url }}" class="btn-review text-decoration-none">Review</a>
+                                {% elif i.has_reviewable_products %}
+                                    <span class="badge badge-secondary" style="font-size: 10px;">Reviewed</span>
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted small">After delivery</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -177,5 +140,31 @@
         </div>
     </div>
 </div>
+
+{# Modals outside .booking-container (backdrop-filter breaks fixed modal + backdrop stacking) #}
+{% for i in book %}
+    {% if i.status|default:''|lower == 'delivered' and i.pending_review_items|length > 1 %}
+        <div class="modal fade review-modal" id="reviewPickModal-{{ i.id }}" tabindex="-1" role="dialog" aria-labelledby="reviewPickTitle-{{ i.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reviewPickTitle-{{ i.id }}">Choose a product to review</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body pt-0">
+                        <p class="text-muted small mb-3">Order <strong>#{{ i.booking_id }}</strong> — pick one item to begin.</p>
+                        <div class="list-group list-group-flush">
+                            {% for pr in i.pending_review_items %}
+                                <a href="{{ pr.url }}" class="list-group-item list-group-item-action py-3">{{ pr.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
 
 {% endblock %}

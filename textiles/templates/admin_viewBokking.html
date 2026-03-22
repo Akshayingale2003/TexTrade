@@ -5,171 +5,191 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-purple: #6c5ce7;
+        --text-dark: #2d3436;
+    }
 
     body {
-        background-color: #f4f7f6;
+        background-color: #f8f9fa;
         font-family: 'Poppins', sans-serif;
     }
 
     .table-container {
-        margin: 100px auto 50px;
+        margin: 50px auto;
         max-width: 98%;
-        background: #ffffff;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        background: var(--glass-bg);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
     }
 
     .page-title {
-        font-family: 'Monotype Corsiva', cursive;
-        color: #E6120E;
-        font-weight: bold;
-        font-size: 2.5rem;
-        margin-bottom: 30px;
-        text-align: center;
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 2rem;
+        margin-bottom: 10px;
     }
 
     /* Modern Table Styling */
     .custom-table {
         width: 100%;
         border-collapse: separate;
-        border-spacing: 0 8px;
+        border-spacing: 0 12px;
     }
 
     .custom-table thead th {
-        background-color: #f8f9fa;
-        color: #333;
-        font-weight: 600;
+        background-color: transparent;
+        color: #b2bec3;
+        font-weight: 700;
         text-transform: uppercase;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         padding: 15px;
         border: none;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        text-align: center;
     }
 
     .custom-table tbody tr {
         background-color: #fff;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        transition: transform 0.2s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
     }
 
     .custom-table tbody tr:hover {
-        background-color: #fcfcfc;
-        transform: scale(1.002);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(108, 92, 231, 0.1);
     }
 
     .custom-table td {
-        padding: 15px;
+        padding: 20px 15px;
         vertical-align: middle;
-        border-top: 1px solid #eee;
-        border-bottom: 1px solid #eee;
+        border: none;
         font-size: 0.9rem;
+        text-align: center;
+        color: var(--text-dark);
     }
+
+    .custom-table td:first-child { border-radius: 15px 0 0 15px; }
+    .custom-table td:last-child { border-radius: 0 15px 15px 0; }
 
     /* Status Pill Styling */
     .status-pill {
-        padding: 6px 14px;
-        border-radius: 30px;
-        font-size: 0.75rem;
-        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 800;
         text-transform: uppercase;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         border: none;
-        cursor: pointer;
         transition: 0.3s;
+        cursor: pointer;
     }
 
-    .status-pending { background-color: #fff3cd; color: #856404; }
-    .status-completed { background-color: #d4edda; color: #155724; }
-    .status-cancelled { background-color: #f8d7da; color: #721c24; }
-
-    .status-pill:hover {
-        filter: brightness(0.9);
-        transform: translateY(-1px);
-    }
+    .status-pending { background-color: #fffbeb; color: #d97706; }
+    .status-completed { background-color: #ecfdf5; color: #059669; }
+    .status-cancelled { background-color: #fef2f2; color: #dc2626; }
 
     /* Action Buttons */
     .btn-action {
-        padding: 8px 15px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.8rem;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.75rem;
         border: none;
         transition: 0.3s;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 8px;
+        text-transform: uppercase;
     }
 
-    .btn-view { background-color: #e3f2fd; color: #1976d2; }
-    .btn-view:hover { background-color: #1976d2; color: white; }
+    .btn-view { background-color: #f1f2f6; color: var(--accent-purple); }
+    .btn-view:hover { background-color: var(--accent-purple); color: white; }
 
-    .btn-cancel { background-color: #ffebee; color: #d32f2f; }
-    .btn-cancel:hover { background-color: #d32f2f; color: white; }
+    .btn-cancel { background-color: #fef2f2; color: #dc2626; }
+    .btn-cancel:hover { background-color: #dc2626; color: white; }
 
+    .price-text {
+        font-weight: 800;
+        color: var(--accent-purple);
+    }
 </style>
 
-<div class="container table-container">
-    <h2 class="page-title">All Customer Orders</h2>
-    <hr style="width: 80px; border-top: 3px solid #E6120E; margin: 0 auto 40px;">
+<div class="container-fluid">
+    <div class="table-container">
+        <div class="text-center mb-5">
+            <h2 class="page-title">Order Management</h2>
+            <p class="text-muted">Monitor and manage all customer transactions</p>
+        </div>
 
-    <div class="table-responsive">
-        <table class="table custom-table" id="myTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Order ID</th>
-                    <th>Booking Date</th>
-                    <th>Customer Name</th>
-                    <th>Total Price</th>
-                    <th>Status</th>
-                    <th class="text-center">Details</th>
-                    <th class="text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in book %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td class="font-weight-bold text-primary">#{{ i.booking.booking_id }}</td>
-                    <td>{{ i.booking.book_date }}</td>
-                    <td>
-                        <div class="d-flex flex-column">
-                            <span>{{ i.booking.profile.user.username }}</span>
-                            <small class="text-muted">{{ i.booking.profile.user.email }}</small>
-                        </div>
-                    </td>
-                    <td class="font-weight-bold text-dark">₹ {{ i.booking.total }}</td>
-                    <td>
-                        <a href="{% url 'Edit_status' i.booking.booking_id i.booking.id %}" class="text-decoration-none">
-                            <button class="status-pill 
-                                {% if i.booking.status.name == 'Pending' %} status-pending
-                                {% elif i.booking.status.name == 'Completed' %} status-completed
-                                {% else %} status-cancelled {% endif %}">
-                                <i class="fas fa-sync-alt mr-1"></i> {{ i.booking.status }}
-                            </button>
-                        </a>
-                    </td>
-                    <td class="text-center">
-                        <a href="{% url 'admin_booking_detail' i.booking.booking_id  i.booking.id  i.booking.profile.user.id %}" class="text-decoration-none">
-                            <button class="btn-action btn-view">
-                                <i class="fas fa-eye"></i> Detail
-                            </button>
-                        </a>
-                    </td>
-                    <td class="text-center">
-                        <a href=" " 
-                           onclick="return confirm('Are you sure you want to cancel this booking?')" class="text-decoration-none">
-                            <button class="btn-action btn-cancel">
-                                <i class="fas fa-times-circle"></i> Cancel
-                            </button>
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table custom-table" id="myTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in book %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="font-weight-bold" style="color: var(--accent-purple);">#{{ i.booking_id }}</td>
+                        <td>{{ i.book_date }}</td>
+                        <td>
+                            <div class="text-left d-inline-block">
+                                <div class="font-weight-bold">{{ i.profile.user.username }}</div>
+                                <small class="text-muted">{{ i.profile.user.email }}</small>
+                            </div>
+                        </td>
+                        <td class="price-text">₹{{ i.total }}</td>
+                        <td>
+                            <a href="{% url 'Edit_status' i.booking_id i.id %}" class="text-decoration-none">
+                                <span class="status-pill 
+                                    {% if i.status == 'Pending' %} status-pending
+                                    {% elif i.status == 'Completed' %} status-completed
+                                    {% else %} status-cancelled {% endif %}">
+                                    <i class="fas fa-circle" style="font-size: 6px;"></i> {{ i.status }}
+                                </span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{% url 'admin_booking_detail' i.booking_id i.id i.profile.user.id %}" class="text-decoration-none">
+                                <button class="btn-action btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </a>
+                        </td>
+                        <td>
+                            <a href=" " onclick="return confirm('Are you sure you want to cancel this booking?')" class="text-decoration-none">
+                                <button class="btn-action btn-cancel">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
