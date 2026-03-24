@@ -3,88 +3,150 @@
 {% block body %}
 
 <style>
-   /* Typography & Container */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-purple: #6c5ce7;
+    }
 
-.about-container {
-    margin-top: 120px;
-    margin-bottom: 50px;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
-}
+    body {
+        background-color: #f8f9fa;
+    }
 
-.about-heading {
-    font-family: 'Monotype Corsiva', cursive;
-    color: #E6120E;
-    font-size: 3.5rem;
-    font-weight: bold;
-    margin-bottom: 40px;
-    position: relative;
-    display: inline-block;
-}
+    .about-wrapper {
+        margin-top: 60px;
+        margin-bottom: 80px;
+    }
 
-.about-heading::after {
-    content: '';
-    position: absolute;
-    width: 60%;
-    height: 4px;
-    background: #E6120E;
-    bottom: -10px;
-    left: 20%;
-    border-radius: 2px;
-}
+    .about-card {
+        background: var(--glass-bg);
+        border-radius: 30px;
+        padding: 60px 40px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+    }
 
-.about-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 50px;
-    flex-wrap: wrap;
-}
+    .about-heading {
+        font-weight: 800;
+        background: var(--main-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
 
-.img-wrapper {
-    position: relative;
-    overflow: hidden;
-    border-radius: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
+    .heading-line {
+        height: 5px;
+        width: 80px;
+        background: var(--main-gradient);
+        margin: 0 auto 40px;
+        border-radius: 10px;
+    }
 
-.about-img {
-    display: block;
-    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
+    .about-content {
+        display: flex;
+        align-items: center;
+        gap: 60px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-.img-wrapper:hover .about-img {
-    transform: scale(1.1);
-}
+    /* Enhanced Image Styling */
+    .img-container {
+        position: relative;
+        z-index: 1;
+    }
 
-.about-text {
-    max-width: 600px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: #333;
-    text-align: justify;
-    animation: fadeInRight 1s ease-out;
-}
+    .img-container::before {
+        content: "";
+        position: absolute;
+        top: -15px;
+        left: -15px;
+        right: 15px;
+        bottom: 15px;
+        border: 2px solid var(--accent-purple);
+        border-radius: 25px;
+        z-index: -1;
+        opacity: 0.3;
+    }
 
-@keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+    .about-img {
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(108, 92, 231, 0.2);
+        transition: transform 0.5s ease;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+
+    .about-text {
+        flex: 1;
+        min-width: 300px;
+        max-width: 650px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #4a5568;
+        text-align: left;
+    }
+
+    .about-text strong {
+        color: var(--accent-purple);
+        font-weight: 700;
+    }
+
+    .highlight-box {
+        background: #f8f9fd;
+        border-left: 4px solid var(--accent-purple);
+        padding: 20px;
+        border-radius: 0 15px 15px 0;
+        margin-top: 25px;
+        font-style: italic;
+        color: #2d3436;
+    }
+
+    @media (max-width: 992px) {
+        .about-text { text-align: center; }
+        .about-heading { font-size: 2.5rem; }
+        .highlight-box { border-left: none; border-top: 4px solid var(--accent-purple); border-radius: 15px; }
+    }
 </style>
 
-<div class="container about-container">
-    <h2 class="about-heading">About Us</h2>
-    <div class="about-content">
-        <img src="{% static 'images/abt.jpg' %}" alt="About Us" class="about-img" width="350" height="250">
-        <p class="about-text">
-            Welcome to <strong>texTrade</strong>, your gateway to the thriving textile marketplace , brought online for businesses and customers worldwide. Our platform is designed to bridge the gap between tradition and innovation, empowering textile businesses with digital tools to expand their reach and streamline operations. Whether you're a business owner managing inventory and orders or a customer exploring premium textile products, texTrade delivers a seamless and personalized experience.<br><br>
-            At texTrade, we take pride in revolutionizing the way textiles are traded, ensuring accessibility, efficiency, and global connectivity for every stakeholder in the industry. Join us as we weave the future of textiles together!
-        </p>
+<div class="container about-wrapper">
+    <div class="about-card text-center">
+        <h2 class="about-heading">Our Story</h2>
+        <div class="heading-line"></div>
+        
+        <div class="about-content">
+            <div class="img-container">
+                <img src="{% static 'images/about us texTrade.png' %}" alt="About texTrade" class="about-img img-fluid" width="400">
+            </div>
+            
+            <div class="about-text">
+                <p>
+                    Welcome to <strong>texTrade.</strong>, your premier gateway to a thriving digital textile marketplace. We’ve brought the heart of the industry online to empower businesses and customers across the globe. 
+                </p>
+                <p>
+                    Our platform is built to bridge the gap between <strong>tradition and innovation</strong>. We provide textile entrepreneurs with the digital tools needed to expand their reach, manage inventory effortlessly, and scale operations in a modern economy.
+                </p>
+                
+                <div class="highlight-box">
+                    "At texTrade, we don't just sell fabric; we weave the future of global connectivity, one thread at a time."
+                </div>
+
+                <p class="mt-4">
+                    Whether you are a vendor seeking global reach or a customer looking for premium materials, we ensure a <strong>seamless, secure, and personalized</strong> experience for everyone involved.
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
