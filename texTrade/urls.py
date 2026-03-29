@@ -59,7 +59,7 @@ urlpatterns = [
     path('booking/<str:pid>/', Booking_order, name="booking_order"),
 
     path('process_booking/', process_booking, name="process_booking"),
-    path("payment/<int:total>/<str:booking_id>/", payment, name="payment"),
+    path("payment/", payment, name="payment"),
     path('pay/', views.create_order, name='create_order'),
     path('payment-success/', views.payment_success, name='payment_success'),
     path("booking-confirmation/", booking_confirmation, name="booking_confirmation"),

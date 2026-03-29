@@ -16,6 +16,8 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
+PENDING_CHECKOUT_SESSION_KEY = "pending_checkout"
+
 
 def _pending_reviews_for_booking_items(booking, items, reviewed_product_ids):
     """
@@ -524,33 +526,51 @@ def Booking_order(request, pid):
         con = request.POST['contact']
         t = request.POST['total']
 
-        user = get_object_or_404(User, username=c)
-        profile = get_object_or_404(Profile, user=user)
-        status = "processing"
+        if c != request.user.username:
+            messages.error(request, "Invalid checkout.")
+            return redirect("cart")
 
-        new_booking = Booking.objects.create(
-            profile=profile,
-            book_date=d,
-            total=t,
-            status=status
-        )
+        profile = data
+        cart = Cart.objects.filter(profile=profile)
+        if not cart.exists():
+            messages.error(request, "Your cart is empty.")
+            return redirect("cart")
 
+        try:
+            posted_total = int(float(t))
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid total.")
+            return redirect("booking_order", pid=pid)
 
+        computed_total = sum(ci.product.price * ci.quantity for ci in cart)
+        if posted_total != int(computed_total):
+            messages.error(request, "Your cart changed. Please review and try again.")
+            return redirect("cart")
+
+        checkout_id = uuid.uuid4().hex
+        items = []
         for cart_item in cart:
-            BookingItem.objects.create(
-                booking=new_booking,
-                product=cart_item.product,
-                product_name=cart_item.product.name,
-                product_price=cart_item.product.price,
-                quantity=cart_item.quantity,
-                product_image = cart_item.product.image,
-                product_desc = cart_item.product.desc
-
+            items.append(
+                {
+                    "product_id": cart_item.product_id,
+                    "quantity": cart_item.quantity,
+                    "product_name": cart_item.product.name,
+                    "product_price": cart_item.product.price,
+                    "product_desc": cart_item.product.desc or "",
+                }
             )
 
-        cart.delete()
+        request.session[PENDING_CHECKOUT_SESSION_KEY] = {
+            "checkout_id": checkout_id,
+            "profile_id": profile.id,
+            "book_date": d,
+            "total": posted_total,
+            "status": "processing",
+            "items": items,
+        }
+        request.session.modified = True
 
-        return redirect("payment", new_booking.total, new_booking.booking_id)
+        return redirect("payment")
 
     context = {
         'data': data,
@@ -1075,42 +1095,37 @@ def edit_category(request,pid):
 
 
 @login_required
-def payment(request, total, booking_id):
+def payment(request):
     """
-    Checkout for a specific booking. URL must include the booking_id created on the
-    booking step so we never guess the row from latest_booking or sortable book_date.
+    Razorpay checkout for a pending order stored in session (created on booking form).
+    The Booking row is created only after successful payment or COD in payment_success.
     """
-    profile = request.user.profile
-    booking = get_object_or_404(
-        Booking,
-        booking_id=booking_id,
-        profile=profile,
-    )
-
-    if booking.payment_id:
+    pending = request.session.get(PENDING_CHECKOUT_SESSION_KEY)
+    if not pending:
         return render(
             request,
             "error.html",
-            {"error": "This booking already has a payment recorded."},
+            {"error": "No checkout in progress. Please confirm your booking again."},
+        )
+    if pending.get("profile_id") != request.user.profile.id:
+        return render(
+            request,
+            "error.html",
+            {"error": "Invalid checkout session."},
         )
 
-    if booking.total is None:
-        return render(request, "error.html", {"error": "Invalid booking total."})
+    total = pending.get("total")
+    if total is None:
+        return render(request, "error.html", {"error": "Invalid checkout total."})
 
-    try:
-        if int(booking.total) != int(total):
-            return render(
-                request,
-                "error.html",
-                {"error": "Amount does not match this booking."},
-            )
-    except (TypeError, ValueError):
-        if str(booking.total).strip() != str(total).strip():
-            return render(
-                request,
-                "error.html",
-                {"error": "Amount does not match this booking."},
-            )
+    items = pending.get("items") or []
+    computed = sum(int(i["product_price"]) * int(i["quantity"]) for i in items)
+    if int(total) != int(computed):
+        return render(
+            request,
+            "error.html",
+            {"error": "Checkout total does not match items. Return to cart."},
+        )
 
     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
@@ -1129,56 +1144,18 @@ def payment(request, total, booking_id):
         "amount": total,
         "order_id": order["id"],
         "razorpay_key": settings.RAZORPAY_KEY_ID,
-        "booking_id": booking.booking_id,
+        "checkout_id": pending["checkout_id"],
     }
 
     return render(request, "payment.html", context)
 
 
-razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-
 def create_order(request):
+    """Legacy entrypoint; checkout now uses session + /payment/."""
     if request.method == "POST":
         if not request.user.is_authenticated:
             return redirect("login")
-        booking_id = (request.POST.get("booking_id") or "").strip()
-        if not booking_id:
-            return render(
-                request,
-                "error.html",
-                {"error": "booking_id is required for payment."},
-            )
-        get_object_or_404(
-            Booking,
-            booking_id=booking_id,
-            profile=request.user.profile,
-        )
-
-        amount_paise = int(request.POST.get("amount")) * 100
-        order_currency = "INR"
-        amount_rupees = amount_paise // 100
-
-        order = razorpay_client.order.create(
-            {
-                "amount": amount_paise,
-                "currency": order_currency,
-                "payment_capture": "1",
-            }
-        )
-
-        payment = Payment(order_id=order["id"], amount=amount_rupees, status="Created")
-        payment.save()
-
-        return render(
-            request,
-            "payment.html",
-            {
-                "order_id": order["id"],
-                "razorpay_key": settings.RAZORPAY_KEY_ID,
-                "amount": amount_rupees,
-                "booking_id": booking_id,
-            },
-        )
+        return redirect("payment")
 
     return render(request, "payment_form.html")
 
@@ -1211,12 +1188,16 @@ def process_booking(request):
 @login_required
 @require_POST
 def payment_success(request):
-    booking_id = (request.POST.get("booking_id") or "").strip()
+    """
+    Create Booking + BookingItems + Payment after Razorpay success or COD.
+    Cart is cleared here. Requires matching session from the booking form (checkout_id).
+    """
+    checkout_id = (request.POST.get("checkout_id") or "").strip()
     payment_mode = (request.POST.get("payment_mode") or "").strip()
 
-    if not booking_id:
+    if not checkout_id:
         return JsonResponse(
-            {"status": "error", "message": "Missing booking_id"},
+            {"status": "error", "message": "Missing checkout_id"},
             status=400,
         )
 
@@ -1234,20 +1215,56 @@ def payment_success(request):
                 status=400,
             )
 
+    pending = request.session.get(PENDING_CHECKOUT_SESSION_KEY)
+    if not pending or pending.get("checkout_id") != checkout_id:
+        return JsonResponse(
+            {"status": "error", "message": "Invalid or expired checkout."},
+            status=400,
+        )
+    if pending.get("profile_id") != request.user.profile.id:
+        return JsonResponse(
+            {"status": "error", "message": "Invalid session."},
+            status=403,
+        )
+
+    items = pending.get("items") or []
+    try:
+        computed = sum(int(i["product_price"]) * int(i["quantity"]) for i in items)
+    except (KeyError, TypeError, ValueError):
+        return JsonResponse(
+            {"status": "error", "message": "Invalid checkout items."},
+            status=400,
+        )
+    if int(pending["total"]) != int(computed):
+        return JsonResponse(
+            {"status": "error", "message": "Amount mismatch."},
+            status=400,
+        )
+
     try:
         with transaction.atomic():
-            booking = Booking.objects.select_for_update().get(
-                booking_id=booking_id,
-                profile=request.user.profile,
+            profile = Profile.objects.select_for_update().get(
+                pk=pending["profile_id"],
+                user=request.user,
             )
 
-            if booking.payment_id:
-                return JsonResponse(
-                    {
-                        "status": "error",
-                        "message": "This booking already has a payment recorded.",
-                    },
-                    status=409,
+            booking = Booking.objects.create(
+                profile=profile,
+                book_date=pending["book_date"],
+                total=pending["total"],
+                status=pending.get("status", "processing"),
+            )
+
+            for it in items:
+                product = Product.objects.get(pk=it["product_id"])
+                BookingItem.objects.create(
+                    booking=booking,
+                    product=product,
+                    product_name=it.get("product_name") or product.name,
+                    product_price=it["product_price"],
+                    quantity=it["quantity"],
+                    product_image=product.image,
+                    product_desc=it.get("product_desc") or product.desc or "",
                 )
 
             if payment_mode == "COD":
@@ -1268,10 +1285,19 @@ def payment_success(request):
             booking.payment = payment
             booking.save(update_fields=["payment"])
 
-    except Booking.DoesNotExist:
+            Cart.objects.filter(profile=profile).delete()
+            request.session.pop(PENDING_CHECKOUT_SESSION_KEY, None)
+            request.session.modified = True
+
+    except Product.DoesNotExist:
         return JsonResponse(
-            {"status": "error", "message": "Booking not found"},
-            status=404,
+            {"status": "error", "message": "A product is no longer available."},
+            status=400,
+        )
+    except Profile.DoesNotExist:
+        return JsonResponse(
+            {"status": "error", "message": "Invalid profile."},
+            status=400,
         )
     except Exception:
         return JsonResponse(
@@ -1279,22 +1305,28 @@ def payment_success(request):
             status=500,
         )
 
-    return JsonResponse({"status": "success"})
+    return JsonResponse({"status": "success", "booking_id": booking.booking_id})
 
 # confirmation
 
+
+@login_required
 def booking_confirmation(request):
     booking_id = request.GET.get("booking_id")
     total_amount = request.GET.get("total_amount")
     payment_id = request.GET.get("payment_id")
 
-    booking = Booking.objects.get(booking_id=booking_id)
-   
+    get_object_or_404(
+        Booking,
+        booking_id=booking_id,
+        profile=request.user.profile,
+    )
+
     context = {
         "booking_id": booking_id,
         "total_amount": total_amount,
         "payment_id": payment_id,
-        "order_status": "Confirmed"
+        "order_status": "Confirmed",
     }
 
     return render(request, "booking_confirmation.html", context)

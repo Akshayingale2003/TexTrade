@@ -30,13 +30,14 @@
                         body: new URLSearchParams({
                             "razorpay_payment_id": response.razorpay_payment_id,
                             "razorpay_order_id": response.razorpay_order_id,
-                            "booking_id": "{{ booking_id }}"
+                            "checkout_id": "{{ checkout_id }}"
                         })
                     }).then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
                       .then(function (result) {
                           if (result.ok && result.data.status === "success") {
-                              alert("Payment Successful! Booking updated.");
-                              window.location.href = "/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=" + encodeURIComponent(response.razorpay_payment_id);
+                              alert("Payment Successful! Your order is confirmed.");
+                              var bid = result.data.booking_id || "";
+                              window.location.href = "/booking-confirmation/?booking_id=" + encodeURIComponent(bid) + "&total_amount={{ amount }}&payment_id=" + encodeURIComponent(response.razorpay_payment_id);
                           } else {
                               alert(result.data.message || "Payment could not be saved. Please contact support.");
                           }
@@ -64,13 +65,14 @@
                         },
                         body: new URLSearchParams({
                             "payment_mode": "COD",
-                            "booking_id": "{{ booking_id }}"
+                            "checkout_id": "{{ checkout_id }}"
                         })
                     }).then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
                       .then(function (result) {
                           if (result.ok && result.data.status === "success") {
                               alert("Order Placed Successfully via COD!");
-                              window.location.href = "/booking-confirmation/?booking_id={{ booking_id }}&total_amount={{ amount }}&payment_id=COD";
+                              var bid = result.data.booking_id || "";
+                              window.location.href = "/booking-confirmation/?booking_id=" + encodeURIComponent(bid) + "&total_amount={{ amount }}&payment_id=COD";
                           } else {
                               alert(result.data.message || "Could not place COD order. Please try again.");
                           }
