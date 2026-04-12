@@ -9,71 +9,133 @@
 {% endif %}
 
 <style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --main-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-purple: #6c5ce7;
+        --text-dark: #2d3436;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+    }
+
     .form-wrapper {
-        margin-top: 100px;
+        margin-top: 80px;
         margin-bottom: 50px;
     }
 
-    .card {
-        border-radius: 15px;
+    .card-glass {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
         overflow: hidden;
-        border: none;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.3s ease;
     }
 
-    .card:hover {
+    .card-glass:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
     }
 
-    .card-header {
-        background: linear-gradient(135deg, #007bff, #0056b3) !important;
-        padding: 25px;
-    }
-
-    .form-control {
-        border-radius: 8px;
-        padding: 12px;
-        border: 1px solid #ddd;
-    }
-
-    .form-control:focus {
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);
-        border-color: #007bff;
-    }
-
-    .btn-submit {
-        background: #28a745;
+    .card-header-custom {
+        background: var(--main-gradient);
+        padding: 30px;
+        text-align: center;
         border: none;
-        padding: 12px;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: background 0.3s ease;
+    }
+
+    .card-header-custom h3 {
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 1.4rem;
+        margin: 0;
         color: white;
     }
 
-    .btn-submit:hover {
-        background: #218838;
-        color: white;
+    .form-label {
+        font-weight: 700;
+        color: var(--text-dark);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .form-control-custom {
+        border-radius: 12px;
+        padding: 14px;
+        border: 1px solid #dfe6e9;
+        background: #fdfdff;
+        transition: 0.3s ease;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+        outline: none;
+    }
+
+    .btn-submit-purple {
+        background: var(--main-gradient);
+        border: none;
+        padding: 15px;
+        font-weight: 700;
+        border-radius: 12px;
+        transition: 0.3s;
+        color: white !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .btn-submit-purple:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 25px rgba(108, 92, 231, 0.4);
+    }
+
+    .icon-box {
+        color: var(--accent-purple);
+        margin-right: 8px;
     }
 </style>
 
 <div class="container form-wrapper">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow-lg">
-                <div class="card-header text-white text-center">
-                    <h3 class="mb-0" style="font-family: 'Poppins', sans-serif;">Add New Category</h3>
+        <div class="col-lg-5 col-md-7">
+            <div class="card-glass shadow-lg">
+                <div class="card-header-custom">
+                    <h3><i class="fas fa-folder-plus mr-2"></i>New Category</h3>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-lg-5">
                     <form method="post">
                         {% csrf_token %}
                         <div class="form-group mb-4">
-                            <label for="categoryName" class="font-weight-bold text-secondary">Category Name</label>
-                            <input type="text" class="form-control" id="categoryName" name="cat" placeholder="e.g. Cotton, Silk, Polyester" required>
+                            <label for="categoryName" class="form-label">
+                                <i class="fas fa-tag icon-box"></i>Category Name
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-custom" 
+                                   id="categoryName" 
+                                   name="cat" 
+                                   placeholder="e.g. Cotton, Silk, Premium Saree" 
+                                   required>
                         </div>
-                        <button type="submit" class="btn btn-submit btn-block">Add Category</button>
+                        
+                        <button type="submit" class="btn btn-submit-purple btn-block">
+                            Confirm and Add
+                        </button>
                     </form>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'view_categary' %}" class="small text-muted" style="text-decoration: none;">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to Category List
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -16,38 +16,6 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
-PENDING_CHECKOUT_SESSION_KEY = "pending_checkout"
-
-
-def _pending_reviews_for_booking_items(booking, items, reviewed_product_ids):
-    """
-    Products in this booking the user can still review (delivered + not yet reviewed).
-    Returns (list of {name, url}, has_any_reviewable_product).
-    """
-    pending = []
-    has_reviewable = False
-    if (booking.status or "").strip().lower() != "delivered":
-        return pending, has_reviewable
-    for item in items:
-        if not item.product:
-            continue
-        has_reviewable = True
-        if item.product.id not in reviewed_product_ids:
-            name = (item.product_name or item.product.name or "Product")[:100]
-            pending.append(
-                {
-                    "name": name,
-                    "url": reverse(
-                        "add_review",
-                        kwargs={
-                            "booking_id": booking.booking_id,
-                            "product_id": item.product.id,
-                        },
-                    ),
-                }
-            )
-    return pending, has_reviewable
-
 
 def Home(request):
     cat = ""
@@ -209,7 +177,7 @@ def loginvender(request):
         user = authenticate(request, username=username, password=password)  
 
         if user is not None:
-            if user.is_staff and not user.is_superuser:  # ✅ Only vendors allowed
+            if user.is_staff and not user.is_superuser:  
                 login(request, user)
                 error = 'yes'
             else:
@@ -918,7 +886,7 @@ def Admin_Home(request):
     if not request.user.is_authenticated:
         return redirect('login_admin')
     book = Booking.objects.all()
-    customer = Profile.objects.all()
+    customer = Profile.objects.filter(user__is_staff = False)
     pro = Product.objects.all()
     total_book = 0
     total_customer = 0
@@ -1392,6 +1360,38 @@ def add_review(request, booking_id, product_id):
 
     return render(request, "add_review.html", {"booking": booking, "product": product})
 
+
+PENDING_CHECKOUT_SESSION_KEY = "pending_checkout"
+
+
+def _pending_reviews_for_booking_items(booking, items, reviewed_product_ids):
+    """
+    Products in this booking the user can still review (delivered + not yet reviewed).
+    Returns (list of {name, url}, has_any_reviewable_product).
+    """
+    pending = []
+    has_reviewable = False
+    if (booking.status or "").strip().lower() != "delivered":
+        return pending, has_reviewable
+    for item in items:
+        if not item.product:
+            continue
+        has_reviewable = True
+        if item.product.id not in reviewed_product_ids:
+            name = (item.product_name or item.product.name or "Product")[:100]
+            pending.append(
+                {
+                    "name": name,
+                    "url": reverse(
+                        "add_review",
+                        kwargs={
+                            "booking_id": booking.booking_id,
+                            "product_id": item.product.id,
+                        },
+                    ),
+                }
+            )
+    return pending, has_reviewable
 
 # product details
 
